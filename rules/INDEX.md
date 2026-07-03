@@ -1,0 +1,18 @@
+# Индекс правил (грабли Битрикс24)
+
+Технические грабли и решения, вневременные — не привязаны к конкретному проекту.
+Не журнал (см. `docs/` для состояния проекта) — справочник по технологии.
+
+`grep` здесь перед тем, как открывать конкретный файл.
+
+| Файл | О чём |
+|------|-------|
+| [rule-b24-install-checklist](rule-b24-install-checklist.md) | Полный чек-лист install-flow локального приложения с UI |
+| [b24-local-app-two-phase-install](b24-local-app-two-phase-install.md) | Почему установка в две фазы (installFinish + reload) |
+| [b24-local-app-install-finish-per-user](b24-local-app-install-finish-per-user.md) | Почему installFinish-страница отслеживается по каждому юзеру, а не одним флагом |
+| [b24-marketplace-install-post-no-domain](b24-marketplace-install-post-no-domain.md) | DOMAIN не приходит в install POST на некоторых порталах — цепочка резолва |
+| [b24-local-app-tokens-save-only-on-install](b24-local-app-tokens-save-only-on-install.md) | Когда можно перезаписывать токены, а когда нельзя (не затереть админский) |
+| [b24-local-app-app-reinstall-application-token-mismatch](b24-local-app-app-reinstall-application-token-mismatch.md) | Что ломается при пересоздании local-app в той же карточке |
+| [b24-iframe-x-frame-options-csp](b24-iframe-x-frame-options-csp.md) | Пустой iframe на коробочных серверах клиента (X-Frame-Options) |
+| [local-app-left-menu-auto-bind](local-app-left-menu-auto-bind.md) | LEFT_MENU биндится сам на cloud, вручную — на коробке |
+| [rule-crm-item-universal-api](rule-crm-item-universal-api.md) | Почему `crm.item.*` вместо legacy `crm.<entity>.*` |
