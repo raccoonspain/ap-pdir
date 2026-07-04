@@ -1,4 +1,21 @@
+---
+obj:
+  - IT
+tags:
+  - AI
+  - template
+prjfolder: tpl-b24-php
+prjurl: /
+ssum: Инструкция по привязке приложения к порталу Б24 с момента выполнения скрипта deploy.sh
+---
 # Как привязать приложение к порталу Битрикс24
+
+> Эта инструкция — для **99% случаев**: деплой на наш VPS
+> (`b24.blackboxbegin.space`), где домен и путь известны заранее, и
+> `deploy.sh` сам генерирует рабочий `env.php`. Если деплоите на хостинг
+> заказчика, где путь/домен заранее не известны (shared-хостинг,
+> FTP-заливка) — см. [how-to-link-ALL.md](how-to-link-ALL.md) вместо этого
+> файла.
 
 ## Что такое client_id и client_secret
 
@@ -21,25 +38,12 @@
 bash deploy.sh
 ```
 
-### 2. Открыть init.php и исправить APP_URL
+При первом деплое скрипт сам создаёт `/var/www/b24/<slug>/env.php` из
+`env.example` с уже верным `APP_URL` (`https://b24.blackboxbegin.space/<slug>`),
+`APP_PATH` и `DATA_ROOT` — оба детерминированы конвентом, править их
+руками не нужно.
 
-Открыть в браузере:
-```
-https://b24.blackboxbegin.space/<slug>/init.php
-```
-
-Init.php создаст `env.php`, но запишет `APP_URL` без `/<slug>` (особенность Caddy `uri strip_prefix`).
-Вручную исправить в `/var/www/b24/<slug>/env.php`:
-
-```php
-// Было:
-define('APP_URL', 'https://b24.blackboxbegin.space');
-
-// Должно быть:
-define('APP_URL', 'https://b24.blackboxbegin.space/<slug>');
-```
-
-### 3. Зарегистрировать приложение в Б24
+### 2. Зарегистрировать приложение в Б24
 
 В портале Битрикс24: **Приложения → Разработчикам → вкладка «Готовые сценарии» → Другое → Локальное приложение**
 
@@ -50,14 +54,14 @@ define('APP_URL', 'https://b24.blackboxbegin.space/<slug>');
 
 После сохранения Б24 покажет `client_id` и `client_secret`.
 
-### 4. Вписать credentials в env.php
+### 3. Вписать credentials в env.php
 
 ```php
 define('B24_CLIENT_ID', 'app.xxxxxxxxx.xxxxxxxx');    // из карточки Б24
 define('B24_CLIENT_SECRET', 'xxxxxxxxxxxxxxxxxxxxxxxx');  // из карточки Б24
 ```
 
-### 5. Установить приложение
+### 4. Установить приложение
 
 Открыть в браузере страницу приложения в Б24 или перейти по `index.php` напрямую.
 При успешной установке OAuth-токены сохранятся в `data/b24-tokens.php`.
@@ -75,7 +79,7 @@ define('B24_CLIENT_SECRET', 'xxxxxxxxxxxxxxxxxxxxxxxx');  // из карточк
 /var/www/b24/app-portal2/   ← свой env.php с credentials портала 2
 ```
 
-Повторить шаги 1–5 для каждого портала.
+Повторить шаги 1–4 для каждого портала.
 
 ---
 

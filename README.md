@@ -1,4 +1,14 @@
-# `_b24-single-php` — шаблон single-tenant B24 local-app на PHP
+---
+obj:
+  - IT
+tags:
+  - AI
+  - template
+prjfolder: tpl-b24-php
+prjurl: /
+ssum: Структура проекта, базовые грабли, краткое описания места размещения и порядка деплоя
+---
+# `tmpl-b24-php` — шаблон single-tenant B24 local-app на PHP
 
 Канонический скелет для нового приложения **«один деплой = один портал»**.
 PHP-бэкенд, vanilla JS-фронт, файловый store без БД, защита `<?php exit;?>` без `.htaccess`.
@@ -14,15 +24,25 @@ tmpl-b24-php/
 ├── README.md                 ← этот файл
 ├── CLAUDE.md                 ← инструкции Клоду: стек, деплой, канон инфраструктуры
 ├── how-to-link.md            ← пошаговая привязка приложения к порталу Б24
-├── .portal-meta.json         ← tenancy=single, owner
-├── docs/                     ← журнал проекта (state/changelog/decisions/handoff)
-│   └── install-flow-diagram.md  ← диаграмма POST'ов install-flow
+├── deploy.sh                 ← rsync www/ → /var/www/b24/<slug>/ на VPS
+├── .claude/commands/         ← слэш-команды журнала
+│   ├── log.md                ← /log — записать шаг в state.md/changelog.md + snapshot.sh
+│   ├── decision.md           ← /decision — зафиксировать решение в decisions.md
+│   └── handoff.md            ← /handoff — собрать снимок передачи в docs/handoff.md
+├── docs/                     ← журнал проекта, см. docs/handoff.md — точка входа
+│   ├── handoff.md            ← с чего начать новому исполнителю
+│   ├── project-brief.md      ← что за проект и зачем
+│   ├── state.md               ← где мы сейчас + следующие шаги (живой снимок)
+│   ├── changelog.md           ← что уже сделано, по датам
+│   ├── decisions.md            ← почему так, а не иначе (D-NNN)
+│   ├── onboarding.md            ← протокол первого запуска (до .onboarding-done)
+│   └── install-flow-diagram.md   ← диаграмма POST'ов install-flow
 ├── rules/                    ← КБ граблей Битрикс24 (см. rules/INDEX.md)
 ├── scripts/
 │   └── snapshot.sh           ← коммит-снимок для журнала
 └── www/                      ← всё, что деплоится на хостинг
-    ├── env.example           ← шаблон env.php
-    ├── init.php               ← одноразовый bootstrap нового хостинга
+    ├── env.example           ← шаблон env.php; deploy.sh генерирует из него env.php сам
+    ├── init.php               ← bootstrap для 1%-кейса (чужой хостинг, путь/домен неизвестны заранее)
     ├── index.php               ← главный handler (install POST + runtime)
     ├── template.html           ← UI (рендерится через index.php, не веб-сервером напрямую)
     ├── api/
@@ -60,10 +80,16 @@ tmpl-b24-php/
 
 ## Как создать новый проект
 
-Деплой, хостинг и первый запуск (`deploy.sh` → `init.php` → регистрация в Б24)
-описаны **в одном месте** — [CLAUDE.md → ИНФРАСТРУКТУРА СЕРВЕРА](CLAUDE.md#инфраструктура-сервера).
+Деплой, хостинг и первый запуск (`deploy.sh` → env.php создаётся сам →
+регистрация в Б24) описаны **в одном месте** — [CLAUDE.md → ИНФРАСТРУКТУРА СЕРВЕРА](CLAUDE.md#инфраструктура-сервера).
 Пошаговая привязка `client_id`/`client_secret` — в [how-to-link.md](how-to-link.md).
 Здесь эти шаги не дублируются, чтобы не разъезжались при изменении флоу — правь только там.
+
+Это описывает **99% случаев** — деплой на наш VPS, где домен и путь
+заранее известны (`deploy.sh` детерминированно генерирует `env.php`).
+Если деплоите на хостинг заказчика, где путь/домен заранее не известны
+(shared-хостинг, FTP-заливка) — это другой, более редкий кейс: см.
+[how-to-link-ALL.md](how-to-link-ALL.md), там процедура через `www/init.php`.
 
 Коротко:
 

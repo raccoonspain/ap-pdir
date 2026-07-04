@@ -1,5 +1,12 @@
 ---
-description: Зафиксировать важное решение в журнале решений
+obj:
+  - IT
+tags:
+  - AI
+  - template
+prjfolder: tpl-b24-php
+prjurl: .claude/commands/
+ssum: Зафиксировать важное решение в журнале решений
 ---
 
 Зафиксируй принятое решение в `docs/decisions.md`, чтобы будущий исполнитель
