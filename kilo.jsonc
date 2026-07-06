@@ -1,0 +1,17 @@
+{
+  "$schema": "https://app.kilo.ai/config.json",
+
+  // Глобальный дефолт — используется, если для конкретного агента модель не задана явно.
+  // ЗАМЕНИТЬ на реальный ID после настройки провайдера в Settings (плейсхолдер).
+  "model": "openrouter/anthropic/claude-sonnet-4",
+
+  "agent": {
+    "plan":  { "model": "google/gemini-2.5-pro" },   // архитектура/дизайн — большой контекст, сильный reasoning
+    "code":  { "model": "deepseek/deepseek-chat" },    // повседневная реализация — дёшево и быстро
+    "debug": { "model": "google/gemini-2.5-pro" },     // диагностика багов — как plan, ошибка дороже экономии
+    "ask":   { "model": "deepseek/deepseek-chat" }     // вопросы без правок — самое дешёвое
+  }
+
+  // MCP пока не подключаем — встроенного browser-тула достаточно для проверки UI/дашбордов.
+  // См. ~/kilo-setup-universal.md, раздел "Отложено на потом".
+}

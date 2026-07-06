@@ -4,3 +4,4 @@ www/data/
 *.log
 .claude/*
 !.claude/commands/
+!.claude/skills/
