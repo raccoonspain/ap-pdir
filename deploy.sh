@@ -72,7 +72,7 @@ if [ ! -f "$DEPLOY_DIR/env.php" ]; then
     -e "s#(define\\('APP_PATH',[[:space:]]*)''#\\1'${DEPLOY_DIR}'#" \
     -e "s#(define\\('DATA_ROOT',[[:space:]]*)''#\\1'${DEPLOY_DIR}/data'#" \
     www/env.example > "$DEPLOY_DIR/env.php"
-  chmod 0600 "$DEPLOY_DIR/env.php"
+  chmod 0644 "$DEPLOY_DIR/env.php"
   ENV_JUST_CREATED=1
 else
   ENV_JUST_CREATED=0
