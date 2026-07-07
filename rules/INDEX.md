@@ -12,7 +12,8 @@
 | [b24-local-app-install-finish-per-user](b24-local-app-install-finish-per-user.md) | Почему installFinish-страница отслеживается по каждому юзеру, а не одним флагом |
 | [b24-marketplace-install-post-no-domain](b24-marketplace-install-post-no-domain.md) | DOMAIN не приходит в install POST на некоторых порталах — цепочка резолва |
 | [b24-local-app-tokens-save-only-on-install](b24-local-app-tokens-save-only-on-install.md) | Когда можно перезаписывать токены, а когда нельзя (не затереть админский) |
-| [b24-local-app-app-reinstall-application-token-mismatch](b24-local-app-app-reinstall-application-token-mismatch.md) | Что ломается при пересоздании local-app в той же карточке |
+| [b24-local-app-app-reinstall-application-token-mismatch](b24-local-app-app-reinstall-application-token-mismatch.md) | Что ломается при пересоздании local-app в той же карточке — плюс подтверждённый на практике фикс через `app.info().INSTALLED` и ловушка с токенами при смене `client_id` |
+| [b24-iframe-third-party-cookie-blocks-direct-nav](b24-iframe-third-party-cookie-blocks-direct-nav.md) | `api/bind.php`/`api/debug.php` по прямой ссылке падают с «нет сессии» — third-party cookie заблокирована браузером |
 | [b24-iframe-x-frame-options-csp](b24-iframe-x-frame-options-csp.md) | Пустой iframe на коробочных серверах клиента (X-Frame-Options) |
 | [local-app-left-menu-auto-bind](local-app-left-menu-auto-bind.md) | LEFT_MENU биндится сам на cloud, вручную — на коробке |
 | [rule-crm-item-universal-api](rule-crm-item-universal-api.md) | Почему `crm.item.*` вместо legacy `crm.<entity>.*` |
