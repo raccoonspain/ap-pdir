@@ -155,6 +155,12 @@ code {
 .kpi-tile.kpi-red .kpi-value { color: var(--red); }
 .kpi-tile.kpi-yellow .kpi-value { color: var(--yellow); }
 
+.kpi-value-sub {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--muted);
+}
+
 /* ── toolbar / filters ────────────────────────────────────────── */
 
 .toolbar {

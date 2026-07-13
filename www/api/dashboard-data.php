@@ -163,7 +163,14 @@ function dashboardDealMatchesPreset(string $stageCode, string $preset): bool {
 function dashboardEmptyResult(string $preset): array {
     return [
         'preset' => $preset,
-        'kpi'    => ['activeCount' => 0, 'totalCost' => 0.0, 'brokenScheduleCount' => 0, 'awaitingPaymentCount' => 0],
+        'kpi'    => [
+            'activeCount'                  => 0,
+            'totalCost'                    => 0.0,
+            'brokenScheduleCount'          => 0,
+            'awaitingPaymentCount'         => 0,
+            'brokenScheduleMilestoneCount' => 0,
+            'awaitingPaymentMilestoneCount'=> 0,
+        ],
         'deals'  => [],
     ];
 }
@@ -204,7 +211,14 @@ function fetchDashboardData(B24 $b24, string $preset = 'active'): array {
 
     $developerNames = dashboardResolveUserNames($b24, array_column($modules, 'ufCrm19ModCreatorUser'));
 
-    $kpi = ['activeCount' => 0, 'totalCost' => 0.0, 'brokenScheduleCount' => 0, 'awaitingPaymentCount' => 0];
+    $kpi = [
+        'activeCount'                  => 0,
+        'totalCost'                    => 0.0,
+        'brokenScheduleCount'          => 0,
+        'awaitingPaymentCount'         => 0,
+        'brokenScheduleMilestoneCount' => 0,
+        'awaitingPaymentMilestoneCount'=> 0,
+    ];
     $dealRows = [];
 
     foreach ($deals as $deal) {
@@ -224,20 +238,27 @@ function fetchDashboardData(B24 $b24, string $preset = 'active'): array {
             $mLabel     = DASHBOARD_MILESTONE_SHORT_LABELS[$mStageCode] ?? $mStageCode;
             $dealMilestoneCounts[$mLabel] = ($dealMilestoneCounts[$mLabel] ?? 0) + 1;
             $mOpen = !in_array($mStageCode, DASHBOARD_MILESTONE_CLOSED_STAGES, true);
+            $mBrokenSchedule  = false;
+            $mAwaitingPayment = false;
 
             if ($mOpen) {
                 $lag = $m['ufCrm15MstContrPlan'] ?? null;
                 if ($lag !== null) {
                     $lag = (float)$lag;
                     if ($worstLagDays === null || $lag < $worstLagDays) $worstLagDays = $lag;
-                    if ($lag < 0) $brokenSchedule = true;
+                    if ($lag < 0) { $brokenSchedule = true; $mBrokenSchedule = true; }
                 }
-                if ($mStageCode === DASHBOARD_MILESTONE_PAYMENT_STAGE) $awaitingPayment = true;
+                if ($mStageCode === DASHBOARD_MILESTONE_PAYMENT_STAGE) { $awaitingPayment = true; $mAwaitingPayment = true; }
             }
 
             foreach ($paysByMilestone[(string)$m['id']] ?? [] as $pay) {
-                if (dashboardStageCode($pay['stageId'] ?? null) === DASHBOARD_PAY_SENT_STAGE) $awaitingPayment = true;
+                if (dashboardStageCode($pay['stageId'] ?? null) === DASHBOARD_PAY_SENT_STAGE) { $awaitingPayment = true; $mAwaitingPayment = true; }
             }
+
+            // KPI-плашки показывают срыв/оплату по этапам независимо от того, попала ли
+            // сама сделка в счётчик (ранняя стадия сделки не должна прятать просроченный этап).
+            if ($mBrokenSchedule)  $kpi['brokenScheduleMilestoneCount']++;
+            if ($mAwaitingPayment) $kpi['awaitingPaymentMilestoneCount']++;
 
             $moduleRows = [];
             foreach ($modulesByMilestone[(string)$m['id']] ?? [] as $mod) {

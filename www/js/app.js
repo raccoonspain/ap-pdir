@@ -39,7 +39,9 @@
     kpiCount: document.getElementById('kpi-count'),
     kpiCost: document.getElementById('kpi-cost'),
     kpiBroken: document.getElementById('kpi-broken'),
+    kpiBrokenStages: document.getElementById('kpi-broken-stages'),
     kpiAwaiting: document.getElementById('kpi-awaiting'),
+    kpiAwaitingStages: document.getElementById('kpi-awaiting-stages'),
     searchCode: document.getElementById('search-code'),
     searchTitle: document.getElementById('search-title'),
     presetGroup: document.getElementById('preset-group'),
@@ -139,7 +141,9 @@
     els.kpiCount.textContent = state.kpi.activeCount;
     els.kpiCost.textContent = fmtMoney(state.kpi.totalCost);
     els.kpiBroken.textContent = state.kpi.brokenScheduleCount;
+    els.kpiBrokenStages.textContent = '(' + state.kpi.brokenScheduleMilestoneCount + ')';
     els.kpiAwaiting.textContent = state.kpi.awaitingPaymentCount;
+    els.kpiAwaitingStages.textContent = '(' + state.kpi.awaitingPaymentMilestoneCount + ')';
   }
 
   // ── тулбар: пресеты + чекбоксы стадий ───────────────────────────────────
