@@ -94,6 +94,7 @@ ssum: "**Контекст 1го чтения**"
 - **Install-flow** уже зашит — двухфазно через `state` + `installFinish` + reload. См. [rule-b24-install-checklist](rules/rule-b24-install-checklist.md)
 - **Деплой** — `bash deploy.sh` (локальный rsync `www/` → `/var/www/b24/<slug>/`, slug = имя папки проекта). После деплоя перезагружать Caddy не нужно — PHP-FPM подхватывает файлы сразу.
 - **REST-вызовы** — через `$b24 = b24(); $b24->call('method', [...])`. Для CRM сущностей предпочитать `crm.item.*` с `entityTypeId`, не legacy `crm.<entity>.*`. См. [rule-crm-item-universal-api](rules/rule-crm-item-universal-api.md)
+- **REST-вызов для N id (foreach)** — НЕ `foreach ($ids as $id) { $b24->call(...) }`, а `$b24->batch([...])` чанками по 50. См. [rule-b24-rest-batch-not-loop](rules/rule-b24-rest-batch-not-loop.md) — на практике разница 24-34с → 2-3с
 - **State** — через `storeRead(FILE)` / `storeWrite(FILE, $data)`. Все state-файлы в `data/`, защищены `<?php exit;?>` префиксом
 - **Любые грабли Б24** — сначала `grep` по `rules/INDEX.md`, потом конкретный файл
 
