@@ -20,24 +20,30 @@
         <button id="retry-btn" type="button">Повторить</button>
       </div>
 
-      <section class="kpi-row" id="kpi-row">
-        <div class="kpi-tile">
-          <div class="kpi-value" id="kpi-count">—</div>
-          <div class="kpi-label">Активных сделок</div>
-        </div>
-        <div class="kpi-tile">
-          <div class="kpi-value" id="kpi-cost">—</div>
-          <div class="kpi-label">Сумма контрактов</div>
-        </div>
-        <div class="kpi-tile kpi-red">
-          <div class="kpi-value" id="kpi-broken">—</div>
-          <div class="kpi-label">Со срывом графика</div>
-        </div>
-        <div class="kpi-tile kpi-yellow">
-          <div class="kpi-value" id="kpi-awaiting">—</div>
-          <div class="kpi-label">Ожидают оплаты</div>
-        </div>
-      </section>
+      <div class="handle-frame">
+        <span class="corner-handle tl" aria-hidden="true"></span>
+        <span class="corner-handle tr" aria-hidden="true"></span>
+        <span class="corner-handle bl" aria-hidden="true"></span>
+        <span class="corner-handle br" aria-hidden="true"></span>
+        <section class="kpi-row" id="kpi-row">
+          <div class="kpi-tile">
+            <div class="kpi-value" id="kpi-count">—</div>
+            <div class="kpi-label">Активных сделок</div>
+          </div>
+          <div class="kpi-tile">
+            <div class="kpi-value" id="kpi-cost">—</div>
+            <div class="kpi-label">Сумма контрактов</div>
+          </div>
+          <div class="kpi-tile kpi-red">
+            <div class="kpi-value" id="kpi-broken">—</div>
+            <div class="kpi-label">Со срывом графика</div>
+          </div>
+          <div class="kpi-tile kpi-yellow">
+            <div class="kpi-value" id="kpi-awaiting">—</div>
+            <div class="kpi-label">Ожидают оплаты</div>
+          </div>
+        </section>
+      </div>
 
       <section class="toolbar">
         <input type="text" id="search-code" class="search-input" placeholder="Код…" autocomplete="off">
@@ -51,27 +57,33 @@
 
       <section class="stage-checks" id="stage-checks"></section>
 
-      <section class="card table-card">
-        <div id="loading" class="muted">Загрузка…</div>
-        <div id="empty-state" class="muted" hidden>Нет сделок по текущим фильтрам.</div>
-        <table id="deals-table" hidden>
-          <thead>
-            <tr>
-              <th class="col-expand"></th>
-              <th class="sortable" data-sort="code">Код</th>
-              <th>Название</th>
-              <th class="sortable" data-sort="stage">Стадия</th>
-              <th class="num">Цена</th>
-              <th class="num">Остаток</th>
-              <th>Индикаторы</th>
-              <th>Этапы</th>
-              <th>Модули</th>
-              <th class="num">Отставание</th>
-            </tr>
-          </thead>
-          <tbody id="deals-tbody"></tbody>
-        </table>
-      </section>
+      <div class="handle-frame">
+        <span class="corner-handle tl" aria-hidden="true"></span>
+        <span class="corner-handle tr" aria-hidden="true"></span>
+        <span class="corner-handle bl" aria-hidden="true"></span>
+        <span class="corner-handle br" aria-hidden="true"></span>
+        <section class="card table-card">
+          <div id="loading" class="muted">Загрузка…</div>
+          <div id="empty-state" class="muted" hidden>Нет сделок по текущим фильтрам.</div>
+          <table id="deals-table" hidden>
+            <thead>
+              <tr>
+                <th class="col-expand"></th>
+                <th class="sortable" data-sort="code">Код</th>
+                <th>Название</th>
+                <th class="sortable" data-sort="stage">Стадия</th>
+                <th class="num">Цена</th>
+                <th class="num">Остаток</th>
+                <th>Индикаторы</th>
+                <th>Этапы</th>
+                <th>Модули</th>
+                <th class="num">Отставание</th>
+              </tr>
+            </thead>
+            <tbody id="deals-tbody"></tbody>
+          </table>
+        </section>
+      </div>
     </main>
   </div>
 
