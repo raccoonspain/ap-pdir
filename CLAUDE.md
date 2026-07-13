@@ -92,7 +92,7 @@ ssum: "**Контекст 1го чтения**"
 ## КАК Я (КЛОД) РАБОТАЮ В ЭТОМ ПРОЕКТЕ
 
 - **Install-flow** уже зашит — двухфазно через `state` + `installFinish` + reload. См. [rule-b24-install-checklist](rules/rule-b24-install-checklist.md)
-- **Деплой** — `bash deploy.sh` (локальный rsync `www/` → `/var/www/b24/<slug>/`, slug = имя папки проекта). После деплоя перезагружать Caddy не нужно — PHP-FPM подхватывает файлы сразу.
+- **Деплой** — `bash deploy.sh` (rsync `www/` → `deploy@45.91.55.178:/var/www/b24/ap-pdir/` по SSH, см. D-005 — деплой сразу на отдельный VPS rub24.blackboxbegin.space, до старого сервера b24.blackboxbegin.space проект не доехал). После деплоя перезагружать Caddy не нужно — PHP-FPM подхватывает файлы сразу.
 - **REST-вызовы** — через `$b24 = b24(); $b24->call('method', [...])`. Для CRM сущностей предпочитать `crm.item.*` с `entityTypeId`, не legacy `crm.<entity>.*`. См. [rule-crm-item-universal-api](rules/rule-crm-item-universal-api.md)
 - **REST-вызов для N id (foreach)** — НЕ `foreach ($ids as $id) { $b24->call(...) }`, а `$b24->batch([...])` чанками по 50. См. [rule-b24-rest-batch-not-loop](rules/rule-b24-rest-batch-not-loop.md) — на практике разница 24-34с → 2-3с
 - **State** — через `storeRead(FILE)` / `storeWrite(FILE, $data)`. Все state-файлы в `data/`, защищены `<?php exit;?>` префиксом
@@ -127,8 +127,8 @@ ssum: "**Контекст 1го чтения**"
 **Портал Б24:** alfa-prj.bitrix24.ru
 **Плейсменты:** LEFT_MENU
 **Cron:** не нужен — данные читаются через REST при открытии страницы
-**Прод URL:** https://b24.blackboxbegin.space/ap-pdir/
-**Slug / хостинг:** ap-pdir на b24.blackboxbegin.space
+**Прод URL:** https://rub24.blackboxbegin.space/ap-pdir/
+**Slug / хостинг:** ap-pdir на rub24.blackboxbegin.space (VPS 45.91.55.178, см. D-005)
 **Скоупы Б24:** crm user placement
 
 ## ДОКУМЕНТАЦИЯ — ПРОВЕРЯЙ КОГДА ЧТО-ТО НЕ РАБОТАЕТ
@@ -161,9 +161,12 @@ ssum: "**Контекст 1го чтения**"
 
 ## ИНФРАСТРУКТУРА СЕРВЕРА
 
-VPS с Caddy + PHP-FPM. Все B24-приложения живут на `b24.blackboxbegin.space`.
+VPS с Caddy + PHP-FPM. Проект живёт на **отдельном** VPS `rub24.blackboxbegin.space`
+(`45.91.55.178`), не на основном `b24.blackboxbegin.space` — см. D-005. Деплой
+идёт по SSH (ключ `/home/deploy/.ssh/id_ed25519_rub24`), с этой машины сервер
+недоступен напрямую по файловой системе — только через `deploy.sh` / `ssh`.
 
-### Структура на сервере
+### Структура на сервере (на rub24)
 
 ```
 /var/www/b24/
@@ -177,54 +180,50 @@ VPS с Caddy + PHP-FPM. Все B24-приложения живут на `b24.bla
     data/          ← файловый store, не в git
 ```
 
-### Деплой нового проекта
+### Деплой
 
 ```bash
-bash deploy.sh     # rsync www/ → /var/www/b24/<slug>/
+bash deploy.sh     # rsync www/ → deploy@45.91.55.178:/var/www/b24/ap-pdir/ по SSH
 ```
 
 `deploy.sh` автоматически: генерирует `env.php` из `env.example` при первом деплое (если его ещё нет на сервере) с подставленными `APP_URL`/`APP_PATH`/`DATA_ROOT`; не трогает `env.php` при последующих деплоях; исключает `data/`, `init.php`; выставляет `chmod 0777` на `data/`.
 
-### Caddyfile — паттерн для нового проекта
+### Caddyfile на rub24
 
-В `/etc/caddy/Caddyfile` добавить в блок `b24.blackboxbegin.space`:
+`/etc/caddy/Caddyfile` там владеет `deploy` (не root) — правится напрямую по SSH,
+без sudo. Блок `/ap-pdir` уже добавлен в блок `rub24.blackboxbegin.space`:
 
 ```
-handle /<slug>* {
-    uri strip_prefix /<slug>
-    root * /var/www/b24/<slug>
+handle /ap-pdir* {
+    uri strip_prefix /ap-pdir
+    root * /var/www/b24/ap-pdir
     php_fastcgi unix//run/php/php8.3-fpm.sock
     file_server
 }
 ```
 
-После правки перезагрузить (без sudo):
+Перезагрузка после правки (по SSH, без sudo — файл принадлежит `deploy`):
 ```bash
-/usr/bin/caddy reload --config /etc/caddy/Caddyfile
+ssh -i /home/deploy/.ssh/id_ed25519_rub24 deploy@45.91.55.178 \
+  "/usr/bin/caddy reload --config /etc/caddy/Caddyfile"
 ```
 
-### Первый запуск: env.php (99% случаев — известны домен/путь деплоя)
+### env.php
 
-`deploy.sh` сам создаёт `env.php` при первом деплое slug'а: `APP_URL`,
-`APP_PATH`, `DATA_ROOT` детерминированы конвентом (домен фиксирован
-`b24.blackboxbegin.space`, путь = `/var/www/b24/<slug>`) — автоопределять
+`deploy.sh` сам создаёт `env.php` при первом деплое: `APP_URL`, `APP_PATH`,
+`DATA_ROOT` детерминированы конвентом (домен фиксирован
+`rub24.blackboxbegin.space`, путь = `/var/www/b24/ap-pdir`) — автоопределять
 их не нужно.
 
 1. `bash deploy.sh` — env.php уже создан с верным `APP_URL`
 2. Вписать `B24_CLIENT_ID` и `B24_CLIENT_SECRET` из карточки local-app в Б24
-   в `/var/www/b24/<slug>/env.php`
-
-**1% случаев — хостинг заказчика, где путь/домен заранее не известны**
-(shared-хостинг, FTP-заливка, чужой веб-сервер): `deploy.sh` не подходит.
-Смотри [how-to-link-ALL.md](how-to-link-ALL.md) — там процедура через
-`www/init.php`, который сам определяет host-пути по фактическому запросу.
+   в `env.php` на сервере (по SSH — файла нет локально)
 
 ### Регистрация приложения в Битрикс24
 
-КЛОДУ ОБНОВИ пошаговую инструкцию: [how-to-link.md](how-to-link.md)
+Полная пошаговая инструкция: [how-to-link.md](how-to-link.md)
 
 - Тип: **Серверное** (не Статичное)
-- **Путь обработчика:** `https://b24.blackboxbegin.space/<slug>/index.php`
+- **Путь обработчика:** `https://rub24.blackboxbegin.space/ap-pdir/index.php`
 - **Путь установки:** тот же URL (с `/index.php` на конце — обязательно)
-КЛОДУ ОБНОВИ права, указанные ниже и напиши готовую ссылку для регистриции приложения в Битрикс24 и права
-- Права: `crm`, `user`, `placement` — минимум для шаблона
+- Права: `crm`, `user`, `placement` — минимум для проекта
