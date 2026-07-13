@@ -18,25 +18,30 @@ const DASHBOARD_MILESTONE_ENTITY_TYPE_ID = 1054;
 const DASHBOARD_MODULE_ENTITY_TYPE_ID    = 1062;
 const DASHBOARD_PAY_ENTITY_TYPE_ID       = 1058;
 
+/**
+ * Цвета (`COLOR`) — не придуманы, а сняты с реального портала через
+ * `crm.status.list(filter: {ENTITY_ID: "DYNAMIC_<entityTypeId>_STAGE_<categoryId>"})`,
+ * см. D-007 в docs/decisions.md. Совпадают 1:1 с воронкой в настройках Б24.
+ */
 const DASHBOARD_DEAL_STAGES = [
-    'NEW'         => ['order' => 1, 'name' => 'Подписание'],
-    'UC_WRET3K'   => ['order' => 2, 'name' => 'Авансирование'],
-    'CLIENT'      => ['order' => 3, 'name' => 'Работа'],
-    'PREPARATION' => ['order' => 4, 'name' => 'Закрытие'],
-    'SUCCESS'     => ['order' => 5, 'name' => 'Завершено'],
-    'FAIL'        => ['order' => 6, 'name' => 'Разрыв'],
+    'NEW'         => ['order' => 1, 'name' => 'Подписание',     'color' => '#000000'],
+    'UC_WRET3K'   => ['order' => 2, 'name' => 'Авансирование',  'color' => '#fff300'],
+    'CLIENT'      => ['order' => 3, 'name' => 'Работа',         'color' => '#10e5fc'],
+    'PREPARATION' => ['order' => 4, 'name' => 'Закрытие',       'color' => '#00a74c'],
+    'SUCCESS'     => ['order' => 5, 'name' => 'Завершено',      'color' => '#00ff00'],
+    'FAIL'        => ['order' => 6, 'name' => 'Разрыв',         'color' => '#ff0000'],
 ];
 const DASHBOARD_DEAL_EARLY_STAGES  = ['NEW', 'UC_WRET3K'];
 const DASHBOARD_DEAL_CLOSED_STAGES = ['SUCCESS', 'FAIL'];
 
 const DASHBOARD_MILESTONE_STAGES = [
-    'NEW'         => 'Ожидание начала',
-    'PREPARATION' => 'Авансирование',
-    'CLIENT'      => 'В работе',
-    'UC_OLAUWC'   => 'Передача результатов',
-    'UC_PH2XT1'   => 'Оплата',
-    'SUCCESS'     => 'Завершено',
-    'FAIL'        => 'Разрыв',
+    'NEW'         => ['name' => 'Ожидание начала',        'color' => '#000000'],
+    'PREPARATION' => ['name' => 'Авансирование',           'color' => '#fff300'],
+    'CLIENT'      => ['name' => 'В работе',                'color' => '#10e5fc'],
+    'UC_OLAUWC'   => ['name' => 'Передача результатов',    'color' => '#00a74c'],
+    'UC_PH2XT1'   => ['name' => 'Оплата',                  'color' => '#fff300'],
+    'SUCCESS'     => ['name' => 'Завершено',               'color' => '#00ff00'],
+    'FAIL'        => ['name' => 'Разрыв',                  'color' => '#ff0000'],
 ];
 const DASHBOARD_MILESTONE_SHORT_LABELS = [
     'NEW'         => 'ожид',
@@ -51,14 +56,14 @@ const DASHBOARD_MILESTONE_CLOSED_STAGES = ['SUCCESS', 'FAIL'];
 const DASHBOARD_MILESTONE_PAYMENT_STAGE = 'UC_PH2XT1';
 
 const DASHBOARD_MODULE_STAGES = [
-    'NEW'         => 'Запуск',
-    'PREPARATION' => 'Рассмотрение',
-    'CLIENT'      => 'Разработка',
-    'UC_WI1QUU'   => 'Корректировка',
-    'UC_MTO1QJ'   => 'Ожидание',
-    'UC_DFWFJU'   => 'Согласование',
-    'SUCCESS'     => 'Согласовано',
-    'FAIL'        => 'Аннулировано',
+    'NEW'         => ['name' => 'Запуск',         'color' => '#000000'],
+    'PREPARATION' => ['name' => 'Рассмотрение',   'color' => '#88b9ff'],
+    'CLIENT'      => ['name' => 'Разработка',     'color' => '#10e5fc'],
+    'UC_WI1QUU'   => ['name' => 'Корректировка',  'color' => '#ace9fb'],
+    'UC_MTO1QJ'   => ['name' => 'Ожидание',       'color' => '#fff300'],
+    'UC_DFWFJU'   => ['name' => 'Согласование',   'color' => '#00a74c'],
+    'SUCCESS'     => ['name' => 'Согласовано',    'color' => '#00ff00'],
+    'FAIL'        => ['name' => 'Аннулировано',   'color' => '#ff0000'],
 ];
 const DASHBOARD_MODULE_SHORT_LABELS = [
     'NEW'         => 'запуск',
@@ -244,7 +249,8 @@ function fetchDashboardData(B24 $b24, string $preset = 'active'): array {
                     'number'        => $mod['ufCrm19ModNum'] ?? null,
                     'title'         => $mod['title'] ?? '',
                     'stageCode'     => $modStageCode,
-                    'stageName'     => DASHBOARD_MODULE_STAGES[$modStageCode] ?? $modStageCode,
+                    'stageName'     => DASHBOARD_MODULE_STAGES[$modStageCode]['name'] ?? $modStageCode,
+                    'stageColor'    => DASHBOARD_MODULE_STAGES[$modStageCode]['color'] ?? '#888888',
                     'developer'     => $developerNames[(string)($mod['ufCrm19ModCreatorUser'] ?? '')] ?? null,
                     'lastActivity'  => $mod['ufCrm19ModActivTxtlast'] ?? null,
                     'lastActivityAt'=> $mod['ufCrm19ModActivDlast'] ?? null,
@@ -256,7 +262,8 @@ function fetchDashboardData(B24 $b24, string $preset = 'active'): array {
                 'number'         => $m['ufCrm15MstNum'] ?? null,
                 'title'          => $m['title'] ?? '',
                 'stageCode'      => $mStageCode,
-                'stageName'      => DASHBOARD_MILESTONE_STAGES[$mStageCode] ?? $mStageCode,
+                'stageName'      => DASHBOARD_MILESTONE_STAGES[$mStageCode]['name'] ?? $mStageCode,
+                'stageColor'     => DASHBOARD_MILESTONE_STAGES[$mStageCode]['color'] ?? '#888888',
                 'lagDays'        => isset($m['ufCrm15MstContrPlan']) ? (float)$m['ufCrm15MstContrPlan'] : null,
                 'lastActivity'   => $m['ufCrm15MstActLast'] ?? null,
                 'lastActivityAt' => $m['ufCrm15MstActDate'] ?? null,
@@ -275,6 +282,7 @@ function fetchDashboardData(B24 $b24, string $preset = 'active'): array {
             'stageCode'        => $stageCode,
             'stageName'        => DASHBOARD_DEAL_STAGES[$stageCode]['name'] ?? $stageCode,
             'stageOrder'       => DASHBOARD_DEAL_STAGES[$stageCode]['order'] ?? 99,
+            'stageColor'       => DASHBOARD_DEAL_STAGES[$stageCode]['color'] ?? '#888888',
             'cost'             => isset($deal['ufCrm13OCost']) ? (float)$deal['ufCrm13OCost'] : 0.0,
             'balance'          => isset($deal['ufCrm13OBalance']) ? (float)$deal['ufCrm13OBalance'] : 0.0,
             'indicators'       => $indicators,

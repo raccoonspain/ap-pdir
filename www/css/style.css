@@ -73,6 +73,10 @@ code {
   border-radius: 6px;
   padding: 12px 16px;
 }
+/* `display` в правиле выше перебивает UA-стиль `[hidden]{display:none}`
+   (одинаковая специфичность, наше правило позже в каскаде) — без этого
+   баннер виден даже с атрибутом hidden. */
+.error-banner[hidden] { display: none; }
 
 .error-banner button {
   flex-shrink: 0;
@@ -197,20 +201,15 @@ tr.deal-row.expanded { background: var(--row-hover); }
 .expand-icon { display: inline-block; width: 14px; color: var(--muted); transition: transform .12s; }
 .expanded > .col-expand .expand-icon { transform: rotate(90deg); }
 
+/* Фон/текст — инлайновым style из JS (цвет стадии из crm.status.list, см. D-007). */
 .stage-badge {
   display: inline-block;
   padding: 2px 9px;
   border-radius: 12px;
   font-size: 0.78rem;
   font-weight: 600;
-  background: #eef1f4;
-  color: var(--accent);
   white-space: nowrap;
 }
-.stage-badge.stage-1, .stage-badge.stage-2 { background: #eaf2fd; color: #1a5fb4; }
-.stage-badge.stage-3, .stage-badge.stage-4 { background: #fff4e0; color: #a05a00; }
-.stage-badge.stage-5 { background: #e6f5e6; color: var(--ok); }
-.stage-badge.stage-6 { background: var(--red-bg); color: var(--red); }
 
 .indicator-dot {
   display: inline-block;

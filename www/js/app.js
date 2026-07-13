@@ -169,8 +169,19 @@
 
   // ── таблица ──────────────────────────────────────────────────────────
 
-  function stageBadge(order, name) {
-    return '<span class="stage-badge stage-' + order + '">' + esc(name) + '</span>';
+  // Цвет стадии — как в воронке Б24 (снят через crm.status.list, см. D-007).
+  // Текст чёрный/белый по контрасту с фоном (относительная яркость WCAG-упрощённо).
+  function contrastTextColor(hex) {
+    var c = String(hex || '').replace('#', '');
+    if (c.length !== 6) return '#111';
+    var r = parseInt(c.substr(0, 2), 16), g = parseInt(c.substr(2, 2), 16), b = parseInt(c.substr(4, 2), 16);
+    var luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+    return luminance > 0.6 ? '#161616' : '#ffffff';
+  }
+
+  function stageBadge(name, color) {
+    var style = 'background:' + esc(color) + ';color:' + contrastTextColor(color) + ';';
+    return '<span class="stage-badge" style="' + style + '">' + esc(name) + '</span>';
   }
 
   function indicatorDots(indicators) {
@@ -185,7 +196,7 @@
     return '<tr>'
       + '<td>' + esc(mod.number || '') + '</td>'
       + '<td>' + esc(mod.title) + '</td>'
-      + '<td>' + esc(mod.stageName) + '</td>'
+      + '<td>' + stageBadge(mod.stageName, mod.stageColor) + '</td>'
       + '<td>' + esc(mod.developer || '—') + '</td>'
       + '<td>' + esc(mod.lastActivity || '') + (mod.lastActivityAt ? ' <span class="muted">(' + fmtDate(mod.lastActivityAt) + ')</span>' : '') + '</td>'
       + '</tr>';
@@ -208,7 +219,7 @@
     var rows = '<tr class="milestone-row" data-milestone-key="' + key + '">'
       + '<td>' + esc(milestone.number || '') + '</td>'
       + '<td>' + esc(milestone.title) + '</td>'
-      + '<td>' + esc(milestone.stageName) + '</td>'
+      + '<td>' + stageBadge(milestone.stageName, milestone.stageColor) + '</td>'
       + '<td class="num">' + fmtLag(milestone.lagDays) + '</td>'
       + '<td>' + esc(milestone.lastActivity || '') + (milestone.lastActivityAt ? ' <span class="muted">(' + fmtDate(milestone.lastActivityAt) + ')</span>' : '') + '</td>'
       + '</tr>';
@@ -235,7 +246,7 @@
       + '<td class="col-expand"><span class="expand-icon">▶</span></td>'
       + '<td class="deal-code">' + esc(deal.code) + '</td>'
       + '<td>' + esc(deal.title) + '</td>'
-      + '<td>' + stageBadge(deal.stageOrder, deal.stageName) + '</td>'
+      + '<td>' + stageBadge(deal.stageName, deal.stageColor) + '</td>'
       + '<td class="num">' + fmtMoney(deal.cost) + '</td>'
       + '<td class="num">' + fmtMoney(deal.balance) + '</td>'
       + '<td>' + indicatorDots(deal.indicators) + '</td>'
