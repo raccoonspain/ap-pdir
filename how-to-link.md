@@ -4,7 +4,7 @@ obj:
 tags:
   - AI
   - template
-prjfolder: tpl-b24-php
+prjfolder: tmpl-b24-php
 prjurl: /
 ssum: Инструкция по привязке приложения к порталу Б24 с момента выполнения скрипта deploy.sh
 ---
@@ -50,6 +50,7 @@ bash deploy.sh
 - Тип: **Серверное**
 - **Путь обработчика:** `https://b24.blackboxbegin.space/<slug>/index.php`
 - **Путь установки:** тот же URL (с `/index.php` на конце — обязательно)
+КЛОДУ ОБНОВИ права, указанные ниже и напиши готовую ссылку для регистриции приложения в Битрикс24 и права
 - Права (минимум): `crm`, `user`, `placement`
 
 После сохранения Б24 покажет `client_id` и `client_secret`.
