@@ -17,4 +17,5 @@
 | [b24-iframe-x-frame-options-csp](b24-iframe-x-frame-options-csp.md) | Пустой iframe на коробочных серверах клиента (X-Frame-Options) |
 | [local-app-left-menu-auto-bind](local-app-left-menu-auto-bind.md) | LEFT_MENU биндится сам на cloud, вручную — на коробке |
 | [rule-crm-item-universal-api](rule-crm-item-universal-api.md) | Почему `crm.item.*` вместо legacy `crm.<entity>.*` |
+| [rule-crm-item-camelcase-select](rule-crm-item-camelcase-select.md) | `crm.item.list`: `select`/ответ — camelCase (`UF_CRM_13_O_CODE` → `ufCrm13OCode`), верхний регистр в `select` тихо теряет поле |
 | [rule-b24-rest-batch-not-loop](rule-b24-rest-batch-not-loop.md) | REST-вызовы для N id — через `batch()`, не `foreach` с `call()`: на ~85 записях разница 24-34с → 2-3с |

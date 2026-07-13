@@ -16,7 +16,7 @@ ssum: Состояние проекта — где мы сейчас. Живой
 > Обновляй после каждого осмысленного шага и **коммить**.
 
 **Последнее обновление:** 2026-07-13
-**Фаза:** Приложение установлено на rub24, старт реализации `dashboard.php`
+**Фаза:** Бэкенд пульта готов и проверен на живых данных, дальше — UI
 
 ---
 
@@ -35,29 +35,32 @@ ssum: Состояние проекта — где мы сейчас. Живой
 
 Инфраструктура полностью готова: деплой на VPS `rub24.blackboxbegin.space`
 (см. D-005), local-app в Б24 перерегистрирован на этот домен, install-flow
-пройден — `installFinishedAt`/токены сохранены в `data/b24-tokens.php` на
-сервере (`domain: alfa-prj.bitrix24.ru`, `installFinishedUsers: [1]`).
-`api/debug.php` доступен для REST-проверок с живого портала.
+пройден — токены сохранены в `data/b24-tokens.php` на сервере (`domain:
+alfa-prj.bitrix24.ru`).
 
-Код приложения (эндпоинт `www/api/dashboard.php`, UI) ещё не написан —
-только каркас шаблона + утверждённая спека.
+Бэкенд пульта реализован и проверен реальными REST-вызовами:
+`www/api/dashboard-data.php` (`fetchDashboardData()`) собирает дерево
+сделка→этапы→модули с агрегатами/индикаторами через batch-загрузку
+`crm.item.list` по 4 сущностям (Deal/Milestone/Module/Pay, см. D-006),
+`www/api/dashboard.php` — тонкий session-gated эндпоинт с `?filter=active|all|closed`.
+По ходу реализации найдена и задокументирована грабля Б24
+(`rules/rule-crm-item-camelcase-select.md`): `select`/ответ `crm.item.list`
+— camelCase-имена полей, не классические коды из `/source`.
+
+UI (`www/js/app.js` + `www/template.html`) — ещё не написан.
 
 ## Сейчас в работе
 
-Реализация `fetchDashboardData()` / `dashboard.php` по TDD (b24-tdd) —
-следующий шаг после этой записи.
+—
 
 ## Следующие шаги
 
-- [ ] Реализовать `fetchDashboardData()` (новый файл под `www/api/`, не в
-      generic `lib.php` — см. комментарий в шапке `lib.php` про
-      бизнес-специфичные функции): batch-загрузка `crm.item.list`
-      (entityTypeId 1050/1054/1062) + серверная агрегация дерева
-      сделка→этапы→модули с индикаторами — см. спеку и
-      `rules/rule-b24-rest-batch-not-loop.md`
-- [ ] Эндпоинт `www/api/dashboard.php`, отдающий готовое дерево одним JSON
-- [ ] UI: KPI-плашки, таблица сделок, фильтры/сортировка, аккордеон —
-      `www/js/app.js` + `www/template.html`, по контракту из спеки
+- [ ] UI: KPI-плашки, таблица сделок, фильтры (поиск/стадии/пресеты),
+      сортировка, аккордеон Сделка→Этап→Модуль — `www/js/app.js` +
+      `www/template.html`, по JSON-контракту `dashboard.php`
+      (см. `www/api/dashboard-data.php` — формы `deals[]`/`kpi`)
+- [ ] После UI — открыть приложение в Б24 и проверить весь путь глазами
+      (не только API-ответ)
 
 ## Открытые вопросы / блокеры
 
@@ -72,6 +75,8 @@ ssum: Состояние проекта — где мы сейчас. Живой
 | Файловый store | `www/api/store.php` |
 | Плейсменты | `www/api/bind.php` |
 | Admin-gate | `www/api/session.php` |
+| Данные пульта (агрегация) | `www/api/dashboard-data.php` |
+| Эндпоинт пульта | `www/api/dashboard.php` |
 | UI-шаблон | `www/template.html` |
 | JS-фронтенд | `www/js/app.js` |
 | Install-flow диаграмма | `docs/install-flow-diagram.md` |
