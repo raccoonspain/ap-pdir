@@ -124,6 +124,20 @@ function dashboardFetchAllItems(B24 $b24, int $entityTypeId, array $filter, arra
     return $items;
 }
 
+/** Одним REST-вызовом резолвит ID пользователей в «Имя Фамилия» (user.get, FILTER[ID]=[...]). */
+function dashboardResolveUserNames(B24 $b24, array $userIds): array {
+    $userIds = array_values(array_unique(array_filter(array_map('intval', $userIds))));
+    if (!$userIds) return [];
+    $res = $b24->call('user.get', ['FILTER' => ['ID' => $userIds]]);
+    if (!empty($res['error'])) return [];
+    $names = [];
+    foreach ($res['result'] ?? [] as $u) {
+        $name = trim(($u['NAME'] ?? '') . ' ' . ($u['LAST_NAME'] ?? ''));
+        $names[(string)$u['ID']] = $name !== '' ? $name : ('#' . $u['ID']);
+    }
+    return $names;
+}
+
 function dashboardGroupBy(array $items, string $key): array {
     $out = [];
     foreach ($items as $item) {
@@ -183,6 +197,8 @@ function fetchDashboardData(B24 $b24, string $preset = 'active'): array {
     $modulesByMilestone = dashboardGroupBy($modules, 'parentId1054');
     $paysByMilestone    = dashboardGroupBy($pays, 'parentId1054');
 
+    $developerNames = dashboardResolveUserNames($b24, array_column($modules, 'ufCrm19ModCreatorUser'));
+
     $kpi = ['activeCount' => 0, 'totalCost' => 0.0, 'brokenScheduleCount' => 0, 'awaitingPaymentCount' => 0];
     $dealRows = [];
 
@@ -229,7 +245,7 @@ function fetchDashboardData(B24 $b24, string $preset = 'active'): array {
                     'title'         => $mod['title'] ?? '',
                     'stageCode'     => $modStageCode,
                     'stageName'     => DASHBOARD_MODULE_STAGES[$modStageCode] ?? $modStageCode,
-                    'developer'     => $mod['ufCrm19ModCreatorUser'] ?? null,
+                    'developer'     => $developerNames[(string)($mod['ufCrm19ModCreatorUser'] ?? '')] ?? null,
                     'lastActivity'  => $mod['ufCrm19ModActivTxtlast'] ?? null,
                     'lastActivityAt'=> $mod['ufCrm19ModActivDlast'] ?? null,
                 ];

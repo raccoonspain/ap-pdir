@@ -3,37 +3,74 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Приложение</title>
+  <title>Пульт руководителя</title>
   <link rel="stylesheet" href="css/style.css">
-  <!-- B24 JS SDK подключается в iframe-режиме автоматически. Подключаем сами
-       только для подстраховки + чтобы локальное открытие через init.php тоже
-       не падало. -->
   <script src="//api.bitrix24.com/api/v1/"></script>
 </head>
 <body>
   <div id="app">
     <header>
-      <h1>Приложение</h1>
-      <p class="muted">Шаблон single-tenant B24 local-app. Подмени UI на свой.</p>
+      <h1>Пульт руководителя</h1>
+      <p class="muted">Сделка → Этап → Модуль. Сроки и ключевые показатели по каждому объекту без погружения в детали.</p>
     </header>
 
     <main>
-      <section class="card">
-        <h2>Состояние</h2>
-        <ul id="state">
-          <li>BX24: <span id="bx24-state">проверяю…</span></li>
-          <li>Сессия: <span id="session-state">проверяю…</span></li>
-        </ul>
+      <div id="error-banner" class="error-banner" hidden>
+        <span id="error-message"></span>
+        <button id="retry-btn" type="button">Повторить</button>
+      </div>
+
+      <section class="kpi-row" id="kpi-row">
+        <div class="kpi-tile">
+          <div class="kpi-value" id="kpi-count">—</div>
+          <div class="kpi-label">Активных сделок</div>
+        </div>
+        <div class="kpi-tile">
+          <div class="kpi-value" id="kpi-cost">—</div>
+          <div class="kpi-label">Сумма контрактов</div>
+        </div>
+        <div class="kpi-tile kpi-red">
+          <div class="kpi-value" id="kpi-broken">—</div>
+          <div class="kpi-label">Со срывом графика</div>
+        </div>
+        <div class="kpi-tile kpi-yellow">
+          <div class="kpi-value" id="kpi-awaiting">—</div>
+          <div class="kpi-label">Ожидают оплаты</div>
+        </div>
       </section>
 
-      <section class="card">
-        <h2>Что дальше</h2>
-        <ol>
-          <li>Переименуй title и шапку под проект.</li>
-          <li>Добавь свои UI-блоки в этот файл.</li>
-          <li>Добавь свои endpoint'ы в <code>api/</code>.</li>
-          <li>Если нужен placement (вкладка в карточке / пункт в меню) — заполни <code>api/bind.php</code> и открой <code>/api/bind.php</code> из админ-сессии.</li>
-        </ol>
+      <section class="toolbar">
+        <input type="text" id="search-code" class="search-input" placeholder="Код…" autocomplete="off">
+        <input type="text" id="search-title" class="search-input" placeholder="Название…" autocomplete="off">
+        <div class="preset-group" id="preset-group">
+          <button type="button" class="preset-btn" data-preset="active">Активные</button>
+          <button type="button" class="preset-btn" data-preset="all">Все</button>
+          <button type="button" class="preset-btn" data-preset="closed">Только завершённые</button>
+        </div>
+      </section>
+
+      <section class="stage-checks" id="stage-checks"></section>
+
+      <section class="card table-card">
+        <div id="loading" class="muted">Загрузка…</div>
+        <div id="empty-state" class="muted" hidden>Нет сделок по текущим фильтрам.</div>
+        <table id="deals-table" hidden>
+          <thead>
+            <tr>
+              <th class="col-expand"></th>
+              <th class="sortable" data-sort="code">Код</th>
+              <th>Название</th>
+              <th class="sortable" data-sort="stage">Стадия</th>
+              <th class="num">Цена</th>
+              <th class="num">Остаток</th>
+              <th>Индикаторы</th>
+              <th>Этапы</th>
+              <th>Модули</th>
+              <th class="num">Отставание</th>
+            </tr>
+          </thead>
+          <tbody id="deals-tbody"></tbody>
+        </table>
       </section>
     </main>
   </div>
