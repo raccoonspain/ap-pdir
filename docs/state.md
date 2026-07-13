@@ -16,7 +16,7 @@ ssum: Состояние проекта — где мы сейчас. Живой
 > Обновляй после каждого осмысленного шага и **коммить**.
 
 **Последнее обновление:** 2026-07-13
-**Фаза:** Дизайн утверждён, инфраструктура на rub24 поднята, установка приложения в Б24 не завершена
+**Фаза:** Приложение установлено на rub24, старт реализации `dashboard.php`
 
 ---
 
@@ -33,29 +33,27 @@ ssum: Состояние проекта — где мы сейчас. Живой
 конкретной сделки. Бизнес-контекст полей, стадий и связей между смартами —
 в `/source` (5 файлов: Deal, Milestone, Module, Pay, Задачи).
 
-Деплой перенесён на VPS `rub24.blackboxbegin.space` (см. D-005) — код на
-сервере, `env.php` с `B24_CLIENT_ID`/`SECRET` заполнен, Caddy-маршрут
-`/ap-pdir*` отвечает штатным 403-guard'ом. Local-app в Б24 зарегистрирован,
-но с handler'ом на старый домен (`b24.blackboxbegin.space`) — карточку
-нужно поправить на `rub24.blackboxbegin.space`, install-flow ещё не
-завершался (токенов в `data/b24-tokens.php` на rub24 нет).
+Инфраструктура полностью готова: деплой на VPS `rub24.blackboxbegin.space`
+(см. D-005), local-app в Б24 перерегистрирован на этот домен, install-flow
+пройден — `installFinishedAt`/токены сохранены в `data/b24-tokens.php` на
+сервере (`domain: alfa-prj.bitrix24.ru`, `installFinishedUsers: [1]`).
+`api/debug.php` доступен для REST-проверок с живого портала.
 
 Код приложения (эндпоинт `www/api/dashboard.php`, UI) ещё не написан —
 только каркас шаблона + утверждённая спека.
 
 ## Сейчас в работе
 
-—
+Реализация `fetchDashboardData()` / `dashboard.php` по TDD (b24-tdd) —
+следующий шаг после этой записи.
 
 ## Следующие шаги
 
-- [ ] Поправить в карточке local-app в Б24 (`alfa-prj.bitrix24.ru`) Handler/Install
-      path на `https://rub24.blackboxbegin.space/ap-pdir/index.php`
-- [ ] Открыть приложение из меню Б24 — двухфазный install-flow отработает сам,
-      токены сохранятся в `data/b24-tokens.php` на rub24
-- [ ] Реализовать `fetchDashboardData()` в `www/api/lib.php`: batch-загрузка
-      `crm.item.list` (entityTypeId 1050/1054/1062) + серверная агрегация
-      дерева сделка→этапы→модули с индикаторами — см. спеку и
+- [ ] Реализовать `fetchDashboardData()` (новый файл под `www/api/`, не в
+      generic `lib.php` — см. комментарий в шапке `lib.php` про
+      бизнес-специфичные функции): batch-загрузка `crm.item.list`
+      (entityTypeId 1050/1054/1062) + серверная агрегация дерева
+      сделка→этапы→модули с индикаторами — см. спеку и
       `rules/rule-b24-rest-batch-not-loop.md`
 - [ ] Эндпоинт `www/api/dashboard.php`, отдающий готовое дерево одним JSON
 - [ ] UI: KPI-плашки, таблица сделок, фильтры/сортировка, аккордеон —
