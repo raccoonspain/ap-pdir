@@ -220,11 +220,12 @@
       + '<td>' + esc(milestone.number || '') + '</td>'
       + '<td>' + esc(milestone.title) + '</td>'
       + '<td>' + stageBadge(milestone.stageName, milestone.stageColor) + '</td>'
+      + '<td class="num">' + fmtMoney(milestone.cost) + '</td>'
       + '<td class="num">' + fmtLag(milestone.lagDays) + '</td>'
       + '<td>' + esc(milestone.lastActivity || '') + (milestone.lastActivityAt ? ' <span class="muted">(' + fmtDate(milestone.lastActivityAt) + ')</span>' : '') + '</td>'
       + '</tr>';
     if (expanded) {
-      rows += '<tr><td colspan="5" style="padding:0">' + milestoneModulesHtml(milestone) + '</td></tr>';
+      rows += '<tr><td colspan="6" style="padding:0">' + milestoneModulesHtml(milestone) + '</td></tr>';
     }
     return rows;
   }
@@ -234,7 +235,7 @@
       return '<div class="muted">' + (deal.stageOrder <= 2 ? 'Этапы ещё не заведены на этой стадии.' : 'Этапов нет.') + '</div>';
     }
     return '<table class="sub-table"><thead><tr>'
-      + '<th>Номер</th><th>Название</th><th>Стадия</th><th>Дни КП-План</th><th>Последняя активность</th>'
+      + '<th>Номер</th><th>Название</th><th>Стадия</th><th class="num">Цена</th><th class="num">Дни КП-План</th><th>Последняя активность</th>'
       + '</tr></thead><tbody>'
       + deal.milestones.map(function (m) { return milestoneRowHtml(deal, m); }).join('')
       + '</tbody></table>';

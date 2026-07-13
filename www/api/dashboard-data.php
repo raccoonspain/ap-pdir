@@ -188,7 +188,7 @@ function fetchDashboardData(B24 $b24, string $preset = 'active'): array {
 
     $dealIds = array_map(fn($d) => (int)$d['id'], $deals);
 
-    $milestoneSelect = ['id', 'title', 'stageId', 'parentId1050', 'ufCrm15MstNum', 'ufCrm15MstContrPlan', 'ufCrm15MstActLast', 'ufCrm15MstActDate'];
+    $milestoneSelect = ['id', 'title', 'stageId', 'parentId1050', 'ufCrm15MstNum', 'ufCrm15MstCost', 'ufCrm15MstContrPlan', 'ufCrm15MstActLast', 'ufCrm15MstActDate'];
     $milestones = dashboardFetchAllItems($b24, DASHBOARD_MILESTONE_ENTITY_TYPE_ID, ['parentId1050' => $dealIds], $milestoneSelect);
 
     $moduleSelect = ['id', 'title', 'stageId', 'parentId1050', 'parentId1054', 'ufCrm19ModNum', 'ufCrm19ModCreatorUser', 'ufCrm19ModActivTxtlast', 'ufCrm19ModActivDlast'];
@@ -264,6 +264,7 @@ function fetchDashboardData(B24 $b24, string $preset = 'active'): array {
                 'stageCode'      => $mStageCode,
                 'stageName'      => DASHBOARD_MILESTONE_STAGES[$mStageCode]['name'] ?? $mStageCode,
                 'stageColor'     => DASHBOARD_MILESTONE_STAGES[$mStageCode]['color'] ?? '#888888',
+                'cost'           => isset($m['ufCrm15MstCost']) ? (float)$m['ufCrm15MstCost'] : null,
                 'lagDays'        => isset($m['ufCrm15MstContrPlan']) ? (float)$m['ufCrm15MstContrPlan'] : null,
                 'lastActivity'   => $m['ufCrm15MstActLast'] ?? null,
                 'lastActivityAt' => $m['ufCrm15MstActDate'] ?? null,

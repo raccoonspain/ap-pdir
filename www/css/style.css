@@ -1,6 +1,6 @@
 :root {
   --bg: #f4f6f8;
-  --card-bg: #ffffff;
+  --card-bg: #f9fafb;
   --border: #e1e4e8;
   --text: #24292e;
   --muted: #6a737d;
@@ -167,7 +167,16 @@ code {
 
 /* ── table ─────────────────────────────────────────────────────── */
 
-.table-card { padding: 0; overflow-x: auto; }
+/* Плашки стадий (чёрная/жёлтая/красная — цвета из воронки Б24, см. D-007)
+   слишком «выстреливают» на чистом белом — приглушаем полотно таблицы
+   мелким точечным узором вместо плоского #fff. */
+.table-card {
+  padding: 0;
+  overflow-x: auto;
+  background-color: #f8f9fb;
+  background-image: radial-gradient(circle at 1px 1px, rgba(36, 41, 46, 0.07) 1px, transparent 0);
+  background-size: 14px 14px;
+}
 
 table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
 
@@ -181,6 +190,7 @@ thead th {
   text-transform: uppercase;
   letter-spacing: 0.02em;
   white-space: nowrap;
+  background: #eef1f4; /* сплошной фон поверх узора .table-card — заголовок не «в крапинку» */
 }
 
 th.sortable { cursor: pointer; user-select: none; }
@@ -224,13 +234,33 @@ tr.deal-row.expanded { background: var(--row-hover); }
 .lag-negative { color: var(--red); font-weight: 600; }
 .lag-positive { color: var(--muted); }
 
-.detail-row td { padding: 0; background: #fafbfc; }
+.detail-row td {
+  padding: 0;
+  background-color: #f8f9fb;
+  background-image: radial-gradient(circle at 1px 1px, rgba(36, 41, 46, 0.06) 1px, transparent 0);
+  background-size: 14px 14px;
+}
 .detail-wrap { padding: 10px 14px 14px 46px; }
 
-.sub-table { width: 100%; border-collapse: collapse; font-size: 0.84rem; background: #fff; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
-.sub-table th { background: #f4f6f8; padding: 6px 10px; font-size: 0.72rem; text-transform: uppercase; color: var(--muted); text-align: left; }
+.sub-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.84rem;
+  background-color: #f8f9fb;
+  background-image: radial-gradient(circle at 1px 1px, rgba(36, 41, 46, 0.06) 1px, transparent 0);
+  background-size: 14px 14px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.sub-table th { background: #eef1f4; padding: 6px 10px; font-size: 0.72rem; text-transform: uppercase; color: var(--muted); text-align: left; }
 .sub-table td { padding: 7px 10px; border-top: 1px solid var(--border); }
 .sub-table tr.milestone-row { cursor: pointer; }
 .sub-table tr.milestone-row:hover { background: var(--row-hover); }
-.sub-table .module-wrap { padding: 8px 8px 8px 34px; background: #fafbfc; }
+.sub-table .module-wrap {
+  padding: 8px 8px 8px 34px;
+  background-color: #f8f9fb;
+  background-image: radial-gradient(circle at 1px 1px, rgba(36, 41, 46, 0.06) 1px, transparent 0);
+  background-size: 14px 14px;
+}
 .sub-table + .sub-table, .module-wrap { margin-top: 6px; }
