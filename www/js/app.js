@@ -7,6 +7,8 @@
 (function () {
   'use strict';
 
+  var ENTITY_TYPE_ID = { DEAL: 1050, MILESTONE: 1054, MODULE: 1062 };
+
   var DEAL_STAGES = [
     { code: 'NEW',         order: 1, name: 'Подписание' },
     { code: 'UC_WRET3K',   order: 2, name: 'Авансирование' },
@@ -27,6 +29,7 @@
     sortDir: 'asc',
     expandedDeals: new Set(),
     expandedMilestones: new Set(),
+    domain: '',
   };
 
   var els = {
@@ -79,6 +82,19 @@
     return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
     });
+  }
+
+  // ── переход на сущность в Б24 ───────────────────────────────────────────
+
+  function entityUrl(entityTypeId, id) {
+    if (!state.domain) return null;
+    return 'https://' + state.domain + '/crm/type/' + entityTypeId + '/details/' + id + '/';
+  }
+
+  function entityLinkHtml(entityTypeId, id) {
+    var url = entityUrl(entityTypeId, id);
+    if (!url) return '';
+    return '<a class="entity-link" href="' + esc(url) + '" target="_blank" rel="noopener" title="Открыть в Битрикс24">↗</a>';
   }
 
   // ── загрузка ──────────────────────────────────────────────────────────
@@ -195,7 +211,7 @@
   function moduleRowHtml(mod) {
     return '<tr>'
       + '<td>' + esc(mod.number || '') + '</td>'
-      + '<td>' + esc(mod.title) + '</td>'
+      + '<td>' + esc(mod.title) + ' ' + entityLinkHtml(ENTITY_TYPE_ID.MODULE, mod.id) + '</td>'
       + '<td>' + stageBadge(mod.stageName, mod.stageColor) + '</td>'
       + '<td>' + esc(mod.developer || '—') + '</td>'
       + '<td>' + esc(mod.lastActivity || '') + (mod.lastActivityAt ? ' <span class="muted">(' + fmtDate(mod.lastActivityAt) + ')</span>' : '') + '</td>'
@@ -218,7 +234,7 @@
     var expanded = state.expandedMilestones.has(key);
     var rows = '<tr class="milestone-row" data-milestone-key="' + key + '">'
       + '<td>' + esc(milestone.number || '') + '</td>'
-      + '<td>' + esc(milestone.title) + '</td>'
+      + '<td>' + esc(milestone.title) + ' ' + entityLinkHtml(ENTITY_TYPE_ID.MILESTONE, milestone.id) + '</td>'
       + '<td>' + stageBadge(milestone.stageName, milestone.stageColor) + '</td>'
       + '<td class="num">' + fmtMoney(milestone.cost) + '</td>'
       + '<td class="num">' + fmtLag(milestone.lagDays) + '</td>'
@@ -246,7 +262,7 @@
     var html = '<tr class="deal-row' + (expanded ? ' expanded' : '') + '" data-deal-id="' + deal.id + '">'
       + '<td class="col-expand"><span class="expand-icon">▶</span></td>'
       + '<td class="deal-code">' + esc(deal.code) + '</td>'
-      + '<td>' + esc(deal.title) + '</td>'
+      + '<td>' + esc(deal.title) + ' ' + entityLinkHtml(ENTITY_TYPE_ID.DEAL, deal.id) + '</td>'
       + '<td>' + stageBadge(deal.stageName, deal.stageColor) + '</td>'
       + '<td class="num">' + fmtMoney(deal.cost) + '</td>'
       + '<td class="num">' + fmtMoney(deal.balance) + '</td>'
@@ -328,6 +344,7 @@
   });
 
   els.tbody.addEventListener('click', function (e) {
+    if (e.target.closest('.entity-link')) return;
     var milestoneRow = e.target.closest('tr.milestone-row');
     if (milestoneRow) {
       var key = milestoneRow.dataset.milestoneKey;
@@ -370,6 +387,9 @@
     if (!window.APP_SESSION) {
       showError('Нет активной сессии. Открой приложение из левого меню Bitrix24.');
       return;
+    }
+    if (window.BX24 && BX24.getDomain) {
+      state.domain = BX24.getDomain() || '';
     }
     loadData();
   }

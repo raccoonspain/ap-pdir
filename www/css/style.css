@@ -252,6 +252,16 @@ tr.deal-row.expanded { background: var(--row-hover); }
 .expand-icon { display: inline-block; width: 14px; color: var(--muted); transition: transform .12s; }
 .expanded > .col-expand .expand-icon { transform: rotate(90deg); }
 
+.entity-link {
+  display: inline-block;
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 700;
+  opacity: 0.6;
+  transition: opacity .12s;
+}
+.entity-link:hover { opacity: 1; text-decoration: underline; }
+
 /* Фон/текст — инлайновым style из JS (цвет стадии из crm.status.list, см. D-007).
    Чёрная обводка — тот же «стикер»-приём, что и у карточек, цвет заливки не трогаем. */
 .stage-badge {
