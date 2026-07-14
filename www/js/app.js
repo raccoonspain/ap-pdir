@@ -24,6 +24,8 @@
     kpi: null,
     searchCode: '',
     searchTitle: '',
+    filterCustomer: '',
+    filterAssignee: '',
     checkedStages: new Set(DEAL_STAGES.map(function (s) { return s.code; })),
     sortField: 'code',
     sortDir: 'asc',
@@ -44,6 +46,8 @@
     kpiAwaitingStages: document.getElementById('kpi-awaiting-stages'),
     searchCode: document.getElementById('search-code'),
     searchTitle: document.getElementById('search-title'),
+    filterCustomer: document.getElementById('filter-customer'),
+    filterAssignee: document.getElementById('filter-assignee'),
     presetGroup: document.getElementById('preset-group'),
     stageChecks: document.getElementById('stage-checks'),
     loading: document.getElementById('loading'),
@@ -72,12 +76,12 @@
     return sign + Math.round(v) + ' дн.';
   }
 
-  function fmtCounts(counts) {
-    if (!counts) return '—';
-    var parts = Object.keys(counts).map(function (label) {
-      return counts[label] + ' ' + label;
-    });
-    return parts.length ? parts.join(' · ') : '—';
+  function countBadges(counts) {
+    if (!counts || !counts.length) return '—';
+    return counts.map(function (c) {
+      var style = 'background:' + esc(c.color) + ';color:' + contrastTextColor(c.color) + ';';
+      return '<span class="count-badge" style="' + style + '" title="' + esc(c.name) + '">' + c.count + '</span>';
+    }).join('');
   }
 
   function esc(s) {
@@ -127,6 +131,7 @@
         els.loading.hidden = true;
         renderKpi();
         renderStageChecks();
+        renderFilterOptions();
         renderTable();
       })
       .catch(function (err) {
@@ -162,6 +167,30 @@
     }).join('');
   }
 
+  function renderFilterOptions() {
+    function uniqueSorted(field) {
+      var seen = {};
+      state.deals.forEach(function (d) { if (d[field]) seen[d[field]] = true; });
+      return Object.keys(seen).sort(function (a, b) { return a.localeCompare(b, 'ru'); });
+    }
+    function fillSelect(el, values) {
+      var current = el.value;
+      el.innerHTML = '<option value="">' + el.dataset.emptyLabel + '</option>'
+        + values.map(function (v) { return '<option value="' + esc(v) + '">' + esc(v) + '</option>'; }).join('');
+      // Сохраняем выбор фильтра при смене пресета, если значение всё ещё есть в списке
+      // (тот же подход, что у поисковых полей searchCode/searchTitle — они тоже не
+      // сбрасываются в loadData()). Если значения больше нет — молча сбрасываем на «все».
+      el.value = values.indexOf(current) !== -1 ? current : '';
+    }
+    fillSelect(els.filterCustomer, uniqueSorted('customerName'));
+    fillSelect(els.filterAssignee, uniqueSorted('assigneeName'));
+    // fillSelect() мог сбросить el.value, если старое значение пропало из списка
+    // (сменился пресет/данные) — синхронизируем state, иначе фильтр молча продолжит
+    // резать по старому значению, а дропдаун при этом визуально покажет «все».
+    state.filterCustomer = els.filterCustomer.value;
+    state.filterAssignee = els.filterAssignee.value;
+  }
+
   // ── фильтр + сортировка ──────────────────────────────────────────────
 
   function getFilteredSortedDeals() {
@@ -172,6 +201,8 @@
       if (code && String(d.code || '').toLowerCase().indexOf(code) === -1) return false;
       if (title && String(d.title || '').toLowerCase().indexOf(title) === -1) return false;
       if (!state.checkedStages.has(d.stageCode)) return false;
+      if (state.filterCustomer && d.customerName !== state.filterCustomer) return false;
+      if (state.filterAssignee && d.assigneeName !== state.filterAssignee) return false;
       return true;
     });
 
@@ -267,16 +298,18 @@
       + '<td class="col-expand"><span class="expand-icon">▶</span></td>'
       + '<td class="deal-code">' + esc(deal.code) + '</td>'
       + '<td>' + esc(deal.title) + ' ' + entityLinkHtml(ENTITY_TYPE_ID.DEAL, deal.id) + '</td>'
+      + '<td>' + esc(deal.customerName || '—') + '</td>'
+      + '<td>' + esc(deal.assigneeName || '—') + '</td>'
       + '<td>' + stageBadge(deal.stageName, deal.stageColor) + '</td>'
       + '<td class="num">' + fmtMoney(deal.cost) + '</td>'
       + '<td class="num">' + fmtMoney(deal.balance) + '</td>'
       + '<td>' + indicatorDots(deal.indicators) + '</td>'
-      + '<td>' + fmtCounts(deal.milestoneCounts) + '</td>'
-      + '<td>' + fmtCounts(deal.moduleCounts) + '</td>'
+      + '<td>' + countBadges(deal.milestoneCounts) + '</td>'
+      + '<td>' + countBadges(deal.moduleCounts) + '</td>'
       + '<td class="num ' + (deal.lagDays !== null && deal.lagDays < 0 ? 'lag-negative' : 'lag-positive') + '">' + fmtLag(deal.lagDays) + '</td>'
       + '</tr>';
     if (expanded) {
-      html += '<tr class="detail-row"><td colspan="10"><div class="detail-wrap">' + dealMilestonesHtml(deal) + '</div></td></tr>';
+      html += '<tr class="detail-row"><td colspan="12"><div class="detail-wrap">' + dealMilestonesHtml(deal) + '</div></td></tr>';
     }
     return html;
   }
@@ -314,6 +347,14 @@
   });
   els.searchTitle.addEventListener('input', function () {
     state.searchTitle = els.searchTitle.value;
+    renderTable();
+  });
+  els.filterCustomer.addEventListener('change', function () {
+    state.filterCustomer = els.filterCustomer.value;
+    renderTable();
+  });
+  els.filterAssignee.addEventListener('change', function () {
+    state.filterAssignee = els.filterAssignee.value;
     renderTable();
   });
 
