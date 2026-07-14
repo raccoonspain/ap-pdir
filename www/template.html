@@ -48,6 +48,8 @@
       <section class="toolbar">
         <input type="text" id="search-code" class="search-input" placeholder="Код…" autocomplete="off">
         <input type="text" id="search-title" class="search-input" placeholder="Название…" autocomplete="off">
+        <select id="filter-customer" class="search-input"><option value="">Заказчик (все)</option></select>
+        <select id="filter-assignee" class="search-input"><option value="">Ответственный (все)</option></select>
         <div class="preset-group" id="preset-group">
           <button type="button" class="preset-btn" data-preset="active">Активные</button>
           <button type="button" class="preset-btn" data-preset="all">Все</button>
@@ -71,6 +73,8 @@
                 <th class="col-expand"></th>
                 <th class="sortable" data-sort="code">Код</th>
                 <th>Название</th>
+                <th>Заказчик</th>
+                <th>Ответственный</th>
                 <th class="sortable" data-sort="stage">Стадия</th>
                 <th class="num">Цена</th>
                 <th class="num">Остаток</th>
