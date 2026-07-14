@@ -158,6 +158,19 @@ function dashboardResolveUserNames(B24 $b24, array $userIds): array {
     return $names;
 }
 
+/** Одним REST-вызовом резолвит ID компаний в TITLE (crm.company.list, filter ID). */
+function dashboardResolveCompanyNames(B24 $b24, array $companyIds): array {
+    $companyIds = array_values(array_unique(array_filter(array_map('intval', $companyIds))));
+    if (!$companyIds) return [];
+    $res = $b24->call('crm.company.list', ['filter' => ['ID' => $companyIds], 'select' => ['ID', 'TITLE']]);
+    if (!empty($res['error'])) return [];
+    $names = [];
+    foreach ($res['result'] ?? [] as $c) {
+        $names[(string)$c['ID']] = $c['TITLE'] !== '' ? $c['TITLE'] : ('#' . $c['ID']);
+    }
+    return $names;
+}
+
 function dashboardGroupBy(array $items, string $key): array {
     $out = [];
     foreach ($items as $item) {
@@ -219,7 +232,7 @@ function dashboardEmptyResult(string $preset): array {
  * $preset — 'active' (дефолт, все стадии кроме Завершено/Разрыв) / 'all' / 'closed'.
  */
 function fetchDashboardData(B24 $b24, string $preset = 'active'): array {
-    $dealSelect = ['id', 'title', 'stageId', 'ufCrm13OCode', 'ufCrm13OCost', 'ufCrm13OBalance'];
+    $dealSelect = ['id', 'title', 'stageId', 'ufCrm13OCode', 'ufCrm13OCost', 'ufCrm13OBalance', 'ufCrm13CustomerComp', 'assignedById'];
     $allDeals = dashboardFetchAllItems($b24, DASHBOARD_DEAL_ENTITY_TYPE_ID, [], $dealSelect);
 
     $deals = [];
@@ -248,7 +261,10 @@ function fetchDashboardData(B24 $b24, string $preset = 'active'): array {
     $modulesByMilestone = dashboardGroupBy($modules, 'parentId1054');
     $paysByMilestone    = dashboardGroupBy($pays, 'parentId1054');
 
-    $developerNames = dashboardResolveUserNames($b24, array_column($modules, 'ufCrm19ModCreatorUser'));
+    $userIds = array_merge(array_column($modules, 'ufCrm19ModCreatorUser'), array_column($deals, 'assignedById'));
+    $developerNames = dashboardResolveUserNames($b24, $userIds);
+    $companyIds = array_map(fn($d) => dashboardParseCrmBindingId($d['ufCrm13CustomerComp'] ?? null), $deals);
+    $companyNames = dashboardResolveCompanyNames($b24, $companyIds);
 
     $kpi = [
         'activeCount'                  => 0,
@@ -344,6 +360,8 @@ function fetchDashboardData(B24 $b24, string $preset = 'active'): array {
             'stageColor'       => DASHBOARD_DEAL_STAGES[$stageCode]['color'] ?? '#888888',
             'cost'             => isset($deal['ufCrm13OCost']) ? (float)$deal['ufCrm13OCost'] : 0.0,
             'balance'          => isset($deal['ufCrm13OBalance']) ? (float)$deal['ufCrm13OBalance'] : 0.0,
+            'customerName'     => ($cid = dashboardParseCrmBindingId($deal['ufCrm13CustomerComp'] ?? null)) !== null ? ($companyNames[(string)$cid] ?? null) : null,
+            'assigneeName'     => isset($deal['assignedById']) ? ($developerNames[(string)$deal['assignedById']] ?? null) : null,
             'indicators'       => $indicators,
             'lagDays'          => $isEarly ? null : $worstLagDays,
             'milestoneCounts'  => $isEarly ? null : dashboardOrderedStageCounts($dealMilestoneCounts, DASHBOARD_MILESTONE_STAGES),
