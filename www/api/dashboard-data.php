@@ -166,6 +166,30 @@ function dashboardGroupBy(array $items, string $key): array {
     return $out;
 }
 
+/**
+ * Счётчики по стадиям ({stageCode: count}, порядок не гарантирован) → упорядоченный
+ * список для рендера цветных плашек. Порядок и цвет/название берутся из $stageDefs
+ * (порядок объявления констант DASHBOARD_MILESTONE_STAGES/DASHBOARD_MODULE_STAGES —
+ * уже совпадает с жизненным циклом стадии). Стадии с нулевым счётчиком опускаются.
+ * Код, которого нет в $stageDefs (стадия удалена/переименована на портале),
+ * добавляется в конец списка с name=code, color='#888888' — не теряется молча.
+ */
+function dashboardOrderedStageCounts(array $countsByStageCode, array $stageDefs): array {
+    $out = [];
+    foreach ($stageDefs as $code => $def) {
+        $count = $countsByStageCode[$code] ?? 0;
+        if ($count > 0) {
+            $out[] = ['stageCode' => $code, 'name' => $def['name'], 'color' => $def['color'], 'count' => $count];
+        }
+    }
+    foreach ($countsByStageCode as $code => $count) {
+        if ($count > 0 && !isset($stageDefs[$code])) {
+            $out[] = ['stageCode' => $code, 'name' => $code, 'color' => '#888888', 'count' => $count];
+        }
+    }
+    return $out;
+}
+
 /** Пресет фильтруется в PHP после фетча (объём сделок небольшой — см. D-006). */
 function dashboardDealMatchesPreset(string $stageCode, string $preset): bool {
     return match ($preset) {
