@@ -280,6 +280,20 @@ tr.deal-row.expanded { background: var(--row-hover); }
   white-space: nowrap;
 }
 
+.count-badge {
+  display: inline-block;
+  min-width: 18px;
+  padding: 1px 6px;
+  margin-right: 3px;
+  border: 1.5px solid var(--ink);
+  border-radius: 9px;
+  font-size: 0.74rem;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  text-align: center;
+  cursor: default;
+}
+
 .indicator-dot {
   display: inline-block;
   width: 9px;
