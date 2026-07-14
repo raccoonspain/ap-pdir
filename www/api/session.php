@@ -45,10 +45,11 @@ function setSessionCookie(string $token, int $expires): void {
     ]);
 }
 
-function createSession(): array {
+function createSession(?string $userId = null): array {
     $token = bin2hex(random_bytes(16));
     $session = [
         'token'     => $token,
+        'userId'    => $userId,
         'createdAt' => time(),
         'expiresAt' => time() + SESSION_TTL,
     ];
@@ -117,7 +118,7 @@ function tryCreateSessionFromB24Post(): ?array {
         return null;
     }
 
-    return createSession();
+    return createSession(resolveUserIdFromAuth($authId, $stored));
 }
 
 function findSessionFromCookie(): ?array {
