@@ -274,8 +274,7 @@ function fetchDashboardData(B24 $b24, string $preset = 'active'): array {
 
         foreach ($dealMilestones as $m) {
             $mStageCode = dashboardStageCode($m['stageId'] ?? null);
-            $mLabel     = DASHBOARD_MILESTONE_SHORT_LABELS[$mStageCode] ?? $mStageCode;
-            $dealMilestoneCounts[$mLabel] = ($dealMilestoneCounts[$mLabel] ?? 0) + 1;
+            $dealMilestoneCounts[$mStageCode] = ($dealMilestoneCounts[$mStageCode] ?? 0) + 1;
             $mOpen = !in_array($mStageCode, DASHBOARD_MILESTONE_CLOSED_STAGES, true);
             $mBrokenSchedule  = false;
             $mAwaitingPayment = false;
@@ -302,8 +301,7 @@ function fetchDashboardData(B24 $b24, string $preset = 'active'): array {
             $moduleRows = [];
             foreach ($modulesByMilestone[(string)$m['id']] ?? [] as $mod) {
                 $modStageCode = dashboardStageCode($mod['stageId'] ?? null);
-                $modLabel     = DASHBOARD_MODULE_SHORT_LABELS[$modStageCode] ?? $modStageCode;
-                $dealModuleCounts[$modLabel] = ($dealModuleCounts[$modLabel] ?? 0) + 1;
+                $dealModuleCounts[$modStageCode] = ($dealModuleCounts[$modStageCode] ?? 0) + 1;
                 $moduleRows[] = [
                     'id'            => (int)$mod['id'],
                     'number'        => $mod['ufCrm19ModNum'] ?? null,
@@ -348,8 +346,8 @@ function fetchDashboardData(B24 $b24, string $preset = 'active'): array {
             'balance'          => isset($deal['ufCrm13OBalance']) ? (float)$deal['ufCrm13OBalance'] : 0.0,
             'indicators'       => $indicators,
             'lagDays'          => $isEarly ? null : $worstLagDays,
-            'milestoneCounts'  => $isEarly ? null : $dealMilestoneCounts,
-            'moduleCounts'     => $isEarly ? null : $dealModuleCounts,
+            'milestoneCounts'  => $isEarly ? null : dashboardOrderedStageCounts($dealMilestoneCounts, DASHBOARD_MILESTONE_STAGES),
+            'moduleCounts'     => $isEarly ? null : dashboardOrderedStageCounts($dealModuleCounts, DASHBOARD_MODULE_STAGES),
             'milestones'       => $isEarly ? [] : $milestoneRows,
         ];
 
