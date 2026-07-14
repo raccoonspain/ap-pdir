@@ -340,3 +340,86 @@ tr.deal-row.expanded { background: var(--row-hover); }
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
 }
 .sub-table + .sub-table, .module-wrap { margin-top: 6px; }
+
+/* ── модалка создания задачи ─────────────────────────────────────── */
+
+.task-btn {
+  display: inline-block;
+  border: none;
+  background: none;
+  padding: 0;
+  margin-left: 4px;
+  font-size: 0.85em;
+  opacity: 0.65;
+  cursor: pointer;
+  transition: opacity .12s, transform .12s;
+}
+.task-btn:hover { opacity: 1; transform: scale(1.15); }
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(23, 24, 26, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  padding: 20px;
+}
+.modal-overlay[hidden] { display: none; }
+
+.modal {
+  background: var(--card-bg);
+  border: 2px solid var(--ink);
+  border-radius: 16px;
+  padding: 24px;
+  width: 480px;
+  max-width: 100%;
+  max-height: 88vh;
+  overflow-y: auto;
+}
+.modal h2 {
+  margin: 0 0 4px;
+  font-family: var(--font-mono);
+  color: var(--ink);
+  font-size: 1.1rem;
+}
+
+.modal-field { margin-top: 14px; display: flex; flex-direction: column; gap: 4px; }
+.modal-field label {
+  font-size: 0.74rem;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.modal-field input, .modal-field select, .modal-field textarea {
+  padding: 8px 12px;
+  border: 1.5px solid var(--ink);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  background: #fff;
+  color: var(--text);
+  font-family: inherit;
+  outline: none;
+}
+.modal-field input:focus, .modal-field select:focus, .modal-field textarea:focus { border-color: var(--accent); }
+.modal-field textarea { min-height: 90px; resize: vertical; }
+
+.modal-error { color: var(--red); font-size: 0.85rem; margin-top: 12px; }
+.modal-success p { margin: 0 0 6px; color: var(--text); }
+
+.modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; }
+
+.btn-primary, .btn-secondary {
+  padding: 8px 18px;
+  border-radius: 20px;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+}
+.btn-primary { background: var(--accent); border: 1.5px solid var(--accent); color: #fff; }
+.btn-secondary { background: var(--card-bg); border: 1.5px solid var(--ink); color: var(--text); }

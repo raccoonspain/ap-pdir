@@ -91,6 +91,42 @@
     </main>
   </div>
 
+  <div id="task-modal-overlay" class="modal-overlay" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="task-modal-title">
+      <h2 id="task-modal-title">Создать задачу</h2>
+      <form id="task-modal-form">
+        <div class="modal-field">
+          <label for="task-title">Название</label>
+          <input type="text" id="task-title" required autocomplete="off">
+        </div>
+        <div class="modal-field">
+          <label for="task-description">Описание</label>
+          <textarea id="task-description"></textarea>
+        </div>
+        <div class="modal-field">
+          <label for="task-responsible">Исполнитель</label>
+          <select id="task-responsible" required></select>
+        </div>
+        <div class="modal-field">
+          <label for="task-deadline">Срок</label>
+          <input type="date" id="task-deadline">
+        </div>
+        <div id="task-modal-error" class="modal-error" hidden></div>
+        <div class="modal-actions">
+          <button type="button" id="task-modal-cancel" class="btn-secondary">Отмена</button>
+          <button type="submit" id="task-modal-submit" class="btn-primary">Создать</button>
+        </div>
+      </form>
+      <div id="task-modal-success" class="modal-success" hidden>
+        <p>Задача создана.</p>
+        <div class="modal-actions">
+          <a href="#" id="task-modal-open-link" class="btn-primary">Открыть в Битрикс24</a>
+          <button type="button" id="task-modal-close" class="btn-secondary">Готово</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="js/app.js"></script>
 </body>
 </html>

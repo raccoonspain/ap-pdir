@@ -32,6 +32,9 @@
     expandedDeals: new Set(),
     expandedMilestones: new Set(),
     domain: '',
+    users: [],
+    taskModalDealId: null,
+    taskModalObjectShortName: '',
   };
 
   var els = {
@@ -54,6 +57,18 @@
     emptyState: document.getElementById('empty-state'),
     table: document.getElementById('deals-table'),
     tbody: document.getElementById('deals-tbody'),
+    taskModalOverlay: document.getElementById('task-modal-overlay'),
+    taskModalForm: document.getElementById('task-modal-form'),
+    taskTitle: document.getElementById('task-title'),
+    taskDescription: document.getElementById('task-description'),
+    taskResponsible: document.getElementById('task-responsible'),
+    taskDeadline: document.getElementById('task-deadline'),
+    taskModalError: document.getElementById('task-modal-error'),
+    taskModalSuccess: document.getElementById('task-modal-success'),
+    taskModalSuccessLink: document.getElementById('task-modal-open-link'),
+    taskModalCancel: document.getElementById('task-modal-cancel'),
+    taskModalClose: document.getElementById('task-modal-close'),
+    taskSubmitBtn: document.getElementById('task-modal-submit'),
   };
 
   // ── формат ────────────────────────────────────────────────────────────
@@ -103,6 +118,13 @@
     return '<a class="entity-link" href="' + esc(url) + '" target="_blank" rel="noopener" title="Открыть в Битрикс24">↗</a>';
   }
 
+  function taskButtonHtml(level, deal, milestone, mod) {
+    var attrs = 'data-task-level="' + level + '" data-deal-id="' + deal.id + '"';
+    if (milestone) attrs += ' data-milestone-id="' + milestone.id + '"';
+    if (mod) attrs += ' data-module-id="' + mod.id + '"';
+    return '<button type="button" class="task-btn" ' + attrs + ' title="Создать задачу">🎯</button>';
+  }
+
   // ── загрузка ──────────────────────────────────────────────────────────
 
   function showError(message) {
@@ -127,6 +149,8 @@
       .then(function (data) {
         state.deals = data.deals || [];
         state.kpi = data.kpi || null;
+        state.users = data.users || [];
+        renderUserOptions();
         state.checkedStages = new Set(DEAL_STAGES.map(function (s) { return s.code; }));
         els.loading.hidden = true;
         renderKpi();
@@ -191,6 +215,63 @@
     state.filterAssignee = els.filterAssignee.value;
   }
 
+  function renderUserOptions() {
+    els.taskResponsible.innerHTML = '<option value="">Исполнитель…</option>'
+      + state.users.map(function (u) { return '<option value="' + u.id + '">' + esc(u.name) + '</option>'; }).join('');
+  }
+
+  function findDeal(dealId) {
+    return state.deals.find(function (d) { return d.id === dealId; }) || null;
+  }
+  function findMilestone(deal, milestoneId) {
+    return deal.milestones.find(function (m) { return m.id === milestoneId; }) || null;
+  }
+  function findModule(milestone, moduleId) {
+    return milestone.modules.find(function (m) { return m.id === moduleId; }) || null;
+  }
+
+  function taskDescriptionFor(level, deal, milestone, mod) {
+    if (level === 'deal') return 'Задача к сделке «' + deal.title + '»\n';
+    if (level === 'milestone') return 'Задача к этапу «' + milestone.title + '» сделки «' + deal.title + '»\n';
+    return 'Задача к модулю «' + mod.title + '» этапа «' + milestone.title + '» сделки «' + deal.title + '»\n';
+  }
+
+  function showTaskModalError(message) {
+    els.taskModalError.textContent = message;
+    els.taskModalError.hidden = false;
+  }
+
+  function openTaskModal(ds) {
+    var deal = findDeal(Number(ds.dealId));
+    if (!deal) return;
+    var milestone = null, mod = null;
+    if (ds.taskLevel === 'milestone' || ds.taskLevel === 'module') {
+      milestone = findMilestone(deal, Number(ds.milestoneId));
+      if (!milestone) return;
+    }
+    if (ds.taskLevel === 'module') {
+      mod = findModule(milestone, Number(ds.moduleId));
+      if (!mod) return;
+    }
+
+    state.taskModalDealId = deal.id;
+    state.taskModalObjectShortName = deal.objectShortName || '';
+
+    els.taskTitle.value = '';
+    els.taskDescription.value = taskDescriptionFor(ds.taskLevel, deal, milestone, mod);
+    els.taskResponsible.value = '';
+    els.taskDeadline.value = '';
+    els.taskModalError.hidden = true;
+    els.taskModalForm.hidden = false;
+    els.taskModalSuccess.hidden = true;
+    els.taskModalOverlay.hidden = false;
+    els.taskTitle.focus();
+  }
+
+  function closeTaskModal() {
+    els.taskModalOverlay.hidden = true;
+  }
+
   // ── фильтр + сортировка ──────────────────────────────────────────────
 
   function getFilteredSortedDeals() {
@@ -243,24 +324,24 @@
     return out;
   }
 
-  function moduleRowHtml(mod) {
+  function moduleRowHtml(deal, milestone, mod) {
     return '<tr>'
       + '<td>' + esc(mod.number || '') + '</td>'
-      + '<td>' + esc(mod.title) + ' ' + entityLinkHtml(ENTITY_TYPE_ID.MODULE, mod.id) + '</td>'
+      + '<td>' + esc(mod.title) + ' ' + entityLinkHtml(ENTITY_TYPE_ID.MODULE, mod.id) + taskButtonHtml('module', deal, milestone, mod) + '</td>'
       + '<td>' + stageBadge(mod.stageName, mod.stageColor) + '</td>'
       + '<td>' + esc(mod.developer || '—') + '</td>'
       + '<td>' + esc(mod.lastActivity || '') + (mod.lastActivityAt ? ' <span class="muted">(' + fmtDate(mod.lastActivityAt) + ')</span>' : '') + '</td>'
       + '</tr>';
   }
 
-  function milestoneModulesHtml(milestone) {
+  function milestoneModulesHtml(deal, milestone) {
     if (!milestone.modules.length) {
       return '<div class="module-wrap muted">Модулей нет.</div>';
     }
     return '<div class="module-wrap"><table class="sub-table sub-table--modules"><thead><tr>'
       + '<th>Номер</th><th>Название</th><th>Стадия</th><th>Разработчик</th><th>Последняя активность</th>'
       + '</tr></thead><tbody>'
-      + milestone.modules.map(moduleRowHtml).join('')
+      + milestone.modules.map(function (m) { return moduleRowHtml(deal, milestone, m); }).join('')
       + '</tbody></table></div>';
   }
 
@@ -269,14 +350,14 @@
     var expanded = state.expandedMilestones.has(key);
     var rows = '<tr class="milestone-row" data-milestone-key="' + key + '">'
       + '<td>' + esc(milestone.number || '') + '</td>'
-      + '<td>' + esc(milestone.title) + ' ' + entityLinkHtml(ENTITY_TYPE_ID.MILESTONE, milestone.id) + '</td>'
+      + '<td>' + esc(milestone.title) + ' ' + entityLinkHtml(ENTITY_TYPE_ID.MILESTONE, milestone.id) + taskButtonHtml('milestone', deal, milestone, null) + '</td>'
       + '<td>' + stageBadge(milestone.stageName, milestone.stageColor) + '</td>'
       + '<td class="num">' + fmtMoney(milestone.cost) + '</td>'
       + '<td class="num">' + fmtLag(milestone.lagDays) + '</td>'
       + '<td>' + esc(milestone.lastActivity || '') + (milestone.lastActivityAt ? ' <span class="muted">(' + fmtDate(milestone.lastActivityAt) + ')</span>' : '') + '</td>'
       + '</tr>';
     if (expanded) {
-      rows += '<tr><td colspan="6" style="padding:0">' + milestoneModulesHtml(milestone) + '</td></tr>';
+      rows += '<tr><td colspan="6" style="padding:0">' + milestoneModulesHtml(deal, milestone) + '</td></tr>';
     }
     return rows;
   }
@@ -297,7 +378,7 @@
     var html = '<tr class="deal-row' + (expanded ? ' expanded' : '') + '" data-deal-id="' + deal.id + '">'
       + '<td class="col-expand"><span class="expand-icon">▶</span></td>'
       + '<td class="deal-code">' + esc(deal.code) + '</td>'
-      + '<td>' + esc(deal.title) + ' ' + entityLinkHtml(ENTITY_TYPE_ID.DEAL, deal.id) + '</td>'
+      + '<td>' + esc(deal.title) + ' ' + entityLinkHtml(ENTITY_TYPE_ID.DEAL, deal.id) + taskButtonHtml('deal', deal, null, null) + '</td>'
       + '<td>' + esc(deal.customerName || '—') + '</td>'
       + '<td>' + esc(deal.assigneeName || '—') + '</td>'
       + '<td>' + stageBadge(deal.stageName, deal.stageColor) + '</td>'
@@ -389,6 +470,11 @@
   });
 
   els.tbody.addEventListener('click', function (e) {
+    var taskBtn = e.target.closest('.task-btn');
+    if (taskBtn) {
+      openTaskModal(taskBtn.dataset);
+      return;
+    }
     if (e.target.closest('.entity-link')) return;
     var milestoneRow = e.target.closest('tr.milestone-row');
     if (milestoneRow) {
@@ -405,6 +491,46 @@
       else state.expandedDeals.add(dealId);
       renderTable();
     }
+  });
+
+  els.taskModalCancel.addEventListener('click', closeTaskModal);
+  els.taskModalClose.addEventListener('click', closeTaskModal);
+
+  els.taskModalForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var title = els.taskTitle.value.trim();
+    var responsibleId = els.taskResponsible.value;
+    if (!title) { showTaskModalError('Укажи название задачи.'); return; }
+    if (!responsibleId) { showTaskModalError('Выбери исполнителя.'); return; }
+
+    els.taskSubmitBtn.disabled = true;
+    els.taskModalError.hidden = true;
+
+    window.api('POST', 'api/task-create.php', {
+      entityDealId: state.taskModalDealId,
+      objectShortName: state.taskModalObjectShortName,
+      title: title,
+      description: els.taskDescription.value,
+      responsibleId: Number(responsibleId),
+      deadline: els.taskDeadline.value || null,
+    }).then(function (res) {
+      els.taskModalForm.hidden = true;
+      els.taskModalSuccess.hidden = false;
+      els.taskModalSuccessLink.dataset.taskId = res.taskId;
+    }).catch(function (err) {
+      showTaskModalError(err.message);
+    }).finally(function () {
+      els.taskSubmitBtn.disabled = false;
+    });
+  });
+
+  els.taskModalSuccessLink.addEventListener('click', function (e) {
+    e.preventDefault();
+    var taskId = this.dataset.taskId;
+    if (window.BX24 && BX24.openPath) {
+      BX24.openPath('/company/personal/user/0/tasks/task/view/' + taskId + '/');
+    }
+    closeTaskModal();
   });
 
   // ── helper для вызовов нашего бэкенда с прикреплённым session-token ────
