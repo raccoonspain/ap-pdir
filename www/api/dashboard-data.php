@@ -181,6 +181,28 @@ function dashboardResolveCompanyNames(B24 $b24, array $companyIds): array {
     return $names;
 }
 
+/**
+ * Все активные пользователи портала (для <select> исполнителя в задаче).
+ * Пагинация по `next` из ответа user.get — не по total/pageSize, как в
+ * dashboardFetchAllItems(), потому что это классический (не crm.item) метод.
+ */
+function dashboardFetchAllActiveUsers(B24 $b24): array {
+    $users = [];
+    $start = 0;
+    do {
+        $res = $b24->call('user.get', ['FILTER' => ['ACTIVE' => true], 'start' => $start]);
+        if (!empty($res['error'])) {
+            throw new RuntimeException('user.get: ' . ($res['error_description'] ?? $res['error']));
+        }
+        foreach ($res['result'] ?? [] as $u) {
+            $name = trim(($u['NAME'] ?? '') . ' ' . ($u['LAST_NAME'] ?? ''));
+            $users[] = ['id' => (int)$u['ID'], 'name' => $name !== '' ? $name : ('#' . $u['ID'])];
+        }
+        $start = $res['next'] ?? null;
+    } while ($start !== null);
+    return $users;
+}
+
 function dashboardGroupBy(array $items, string $key): array {
     $out = [];
     foreach ($items as $item) {
@@ -234,6 +256,7 @@ function dashboardEmptyResult(string $preset): array {
             'awaitingPaymentMilestoneCount'=> 0,
         ],
         'deals'  => [],
+        'users'  => [],
     ];
 }
 
@@ -242,8 +265,9 @@ function dashboardEmptyResult(string $preset): array {
  * $preset — 'active' (дефолт, все стадии кроме Завершено/Разрыв) / 'all' / 'closed'.
  */
 function fetchDashboardData(B24 $b24, string $preset = 'active'): array {
-    $dealSelect = ['id', 'title', 'stageId', 'ufCrm13OCode', 'ufCrm13OCost', 'ufCrm13OBalance', 'ufCrm13CustomerComp', 'assignedById'];
+    $dealSelect = ['id', 'title', 'stageId', 'ufCrm13OCode', 'ufCrm13OCost', 'ufCrm13OBalance', 'ufCrm13CustomerComp', 'assignedById', 'ufCrm13OSname'];
     $allDeals = dashboardFetchAllItems($b24, DASHBOARD_DEAL_ENTITY_TYPE_ID, [], $dealSelect);
+    $users = dashboardFetchAllActiveUsers($b24);
 
     $deals = [];
     foreach ($allDeals as $deal) {
@@ -372,6 +396,7 @@ function fetchDashboardData(B24 $b24, string $preset = 'active'): array {
             'balance'          => isset($deal['ufCrm13OBalance']) ? (float)$deal['ufCrm13OBalance'] : 0.0,
             'customerName'     => ($cid = dashboardParseCrmBindingId($deal['ufCrm13CustomerComp'] ?? null)) !== null ? ($companyNames[(string)$cid] ?? null) : null,
             'assigneeName'     => isset($deal['assignedById']) ? ($developerNames[(string)$deal['assignedById']] ?? null) : null,
+            'objectShortName'  => $deal['ufCrm13OSname'] ?? '',
             'indicators'       => $indicators,
             'lagDays'          => $isEarly ? null : $worstLagDays,
             'milestoneCounts'  => $isEarly ? null : dashboardOrderedStageCounts($dealMilestoneCounts, DASHBOARD_MILESTONE_STAGES),
@@ -385,5 +410,5 @@ function fetchDashboardData(B24 $b24, string $preset = 'active'): array {
         if (in_array('awaiting_payment', $indicators, true)) $kpi['awaitingPaymentCount']++;
     }
 
-    return ['preset' => $preset, 'kpi' => $kpi, 'deals' => $dealRows];
+    return ['preset' => $preset, 'kpi' => $kpi, 'deals' => $dealRows, 'users' => $users];
 }
