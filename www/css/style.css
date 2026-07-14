@@ -294,17 +294,6 @@ tr.deal-row.expanded { background: var(--row-hover); }
   cursor: default;
 }
 
-.indicator-dot {
-  display: inline-block;
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  margin-right: 4px;
-  border: 1px solid var(--ink);
-}
-.indicator-dot.red { background: var(--red); }
-.indicator-dot.yellow { background: var(--yellow); }
-
 .lag-negative { color: var(--red); font-weight: 600; }
 .lag-positive { color: var(--muted); }
 

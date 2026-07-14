@@ -238,8 +238,8 @@
   function indicatorDots(indicators) {
     if (!indicators || !indicators.length) return '';
     var out = '';
-    if (indicators.indexOf('broken_schedule') !== -1) out += '<span class="indicator-dot red" title="Срыв графика"></span>';
-    if (indicators.indexOf('awaiting_payment') !== -1) out += '<span class="indicator-dot yellow" title="Ожидание оплаты"></span>';
+    if (indicators.indexOf('broken_schedule') !== -1) out += '<span title="Срыв графика">⏰</span>';
+    if (indicators.indexOf('awaiting_payment') !== -1) out += '<span title="Ожидание оплаты">💰</span>';
     return out;
   }
 
