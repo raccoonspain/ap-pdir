@@ -86,6 +86,21 @@ function dashboardStageCode(?string $stageId): string {
 }
 
 /**
+ * Значение UF-поля «Привязка к элементам CRM» (`{PREFIX}_{ID}`, например
+ * "CO_123" для компании) → числовой ID. PREFIX не проверяется — поле может
+ * содержать любой тип привязки, парсинг не должен падать при смене типа.
+ */
+function dashboardParseCrmBindingId(?string $value): ?int {
+    $value = (string)$value;
+    if ($value === '') return null;
+    $pos = strrpos($value, '_');
+    if ($pos === false) return null;
+    $idPart = substr($value, $pos + 1);
+    if ($idPart === '' || !ctype_digit($idPart)) return null;
+    return (int)$idPart;
+}
+
+/**
  * Постранично собирает все элементы `crm.item.list` через batch()
  * (не foreach — см. rules/rule-b24-rest-batch-not-loop.md).
  */
