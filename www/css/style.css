@@ -314,6 +314,22 @@ tr.deal-row.expanded { background: var(--row-hover); }
   border-radius: 10px;
   overflow: hidden;
 }
+.sub-table--milestones,
+.sub-table--modules {
+  table-layout: fixed;
+}
+.sub-table--milestones th:nth-child(1), .sub-table--milestones td:nth-child(1) { width: 8%; }
+.sub-table--milestones th:nth-child(2), .sub-table--milestones td:nth-child(2) { width: 24%; }
+.sub-table--milestones th:nth-child(3), .sub-table--milestones td:nth-child(3) { width: 14%; }
+.sub-table--milestones th:nth-child(4), .sub-table--milestones td:nth-child(4) { width: 13%; }
+.sub-table--milestones th:nth-child(5), .sub-table--milestones td:nth-child(5) { width: 12%; }
+.sub-table--milestones th:nth-child(6), .sub-table--milestones td:nth-child(6) { width: 29%; }
+
+.sub-table--modules th:nth-child(1), .sub-table--modules td:nth-child(1) { width: 8%; }
+.sub-table--modules th:nth-child(2), .sub-table--modules td:nth-child(2) { width: 26%; }
+.sub-table--modules th:nth-child(3), .sub-table--modules td:nth-child(3) { width: 14%; }
+.sub-table--modules th:nth-child(4), .sub-table--modules td:nth-child(4) { width: 18%; }
+.sub-table--modules th:nth-child(5), .sub-table--modules td:nth-child(5) { width: 34%; }
 .sub-table th { background: #eeece2; padding: 6px 10px; font-size: 0.7rem; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.02em; color: var(--muted); text-align: left; }
 .sub-table td { padding: 7px 10px; border-top: 1px solid var(--border); }
 .sub-table tr.milestone-row { cursor: pointer; }

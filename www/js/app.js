@@ -257,7 +257,7 @@
     if (!milestone.modules.length) {
       return '<div class="module-wrap muted">Модулей нет.</div>';
     }
-    return '<div class="module-wrap"><table class="sub-table"><thead><tr>'
+    return '<div class="module-wrap"><table class="sub-table sub-table--modules"><thead><tr>'
       + '<th>Номер</th><th>Название</th><th>Стадия</th><th>Разработчик</th><th>Последняя активность</th>'
       + '</tr></thead><tbody>'
       + milestone.modules.map(moduleRowHtml).join('')
@@ -285,7 +285,7 @@
     if (!deal.milestones.length) {
       return '<div class="muted">' + (deal.stageOrder <= 2 ? 'Этапы ещё не заведены на этой стадии.' : 'Этапов нет.') + '</div>';
     }
-    return '<table class="sub-table"><thead><tr>'
+    return '<table class="sub-table sub-table--milestones"><thead><tr>'
       + '<th>Номер</th><th>Название</th><th>Стадия</th><th class="num">Цена</th><th class="num">Дни КП-План</th><th>Последняя активность</th>'
       + '</tr></thead><tbody>'
       + deal.milestones.map(function (m) { return milestoneRowHtml(deal, m); }).join('')
