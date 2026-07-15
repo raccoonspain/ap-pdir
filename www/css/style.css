@@ -333,6 +333,7 @@ tr.deal-row.expanded { background: var(--row-hover); }
 .sub-table--modules th:nth-child(5), .sub-table--modules td:nth-child(5) { width: 16%; }
 .sub-table--modules th:nth-child(6), .sub-table--modules td:nth-child(6) { width: 29%; }
 .sub-table th { background: #eeece2; padding: 6px 10px; font-size: 0.7rem; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.02em; color: var(--muted); text-align: left; }
+.sub-table th.num { text-align: right; }
 .sub-table td { padding: 7px 10px; border-top: 1px solid var(--border); }
 .sub-table tr.milestone-row { cursor: pointer; }
 .sub-table tr.milestone-row:hover { background: var(--row-hover); }
