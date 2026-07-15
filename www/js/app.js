@@ -91,6 +91,12 @@
     return sign + Math.round(v) + ' дн.';
   }
 
+  function moduleLagSummaryHtml(ml) {
+    if (!ml || !ml.hasModules) return '<span class="muted">БМ</span>';
+    var cls = ml.overdue > 0 ? 'lag-negative' : 'lag-positive';
+    return '<span class="' + cls + '">' + ml.onTrack + '/' + ml.overdue + '</span>';
+  }
+
   function countBadges(counts) {
     if (!counts || !counts.length) return '—';
     return counts.map(function (c) {
@@ -329,6 +335,7 @@
       + '<td>' + esc(mod.number || '') + '</td>'
       + '<td>' + esc(mod.title) + ' ' + entityLinkHtml(ENTITY_TYPE_ID.MODULE, mod.id) + taskButtonHtml('module', deal, milestone, mod) + '</td>'
       + '<td>' + stageBadge(mod.stageName, mod.stageColor) + '</td>'
+      + '<td class="num ' + (mod.lagDays !== null && mod.lagDays < 0 ? 'lag-negative' : 'lag-positive') + '">' + fmtLag(mod.lagDays) + '</td>'
       + '<td>' + esc(mod.developer || '—') + '</td>'
       + '<td>' + esc(mod.lastActivity || '') + (mod.lastActivityAt ? ' <span class="muted">(' + fmtDate(mod.lastActivityAt) + ')</span>' : '') + '</td>'
       + '</tr>';
@@ -339,7 +346,7 @@
       return '<div class="module-wrap muted">Модулей нет.</div>';
     }
     return '<div class="module-wrap"><table class="sub-table sub-table--modules"><thead><tr>'
-      + '<th>Номер</th><th>Название</th><th>Стадия</th><th>Разработчик</th><th>Последняя активность</th>'
+      + '<th>Номер</th><th>Название</th><th>Стадия</th><th class="num">Лаг</th><th>Разработчик</th><th>Последняя активность</th>'
       + '</tr></thead><tbody>'
       + milestone.modules.map(function (m) { return moduleRowHtml(deal, milestone, m); }).join('')
       + '</tbody></table></div>';
@@ -354,10 +361,11 @@
       + '<td>' + stageBadge(milestone.stageName, milestone.stageColor) + '</td>'
       + '<td class="num">' + fmtMoney(milestone.cost) + '</td>'
       + '<td class="num">' + fmtLag(milestone.lagDays) + '</td>'
+      + '<td class="num">' + moduleLagSummaryHtml(milestone.moduleLag) + '</td>'
       + '<td>' + esc(milestone.lastActivity || '') + (milestone.lastActivityAt ? ' <span class="muted">(' + fmtDate(milestone.lastActivityAt) + ')</span>' : '') + '</td>'
       + '</tr>';
     if (expanded) {
-      rows += '<tr><td colspan="6" style="padding:0">' + milestoneModulesHtml(deal, milestone) + '</td></tr>';
+      rows += '<tr><td colspan="7" style="padding:0">' + milestoneModulesHtml(deal, milestone) + '</td></tr>';
     }
     return rows;
   }
@@ -367,7 +375,7 @@
       return '<div class="muted">' + (deal.stageOrder <= 2 ? 'Этапы ещё не заведены на этой стадии.' : 'Этапов нет.') + '</div>';
     }
     return '<table class="sub-table sub-table--milestones"><thead><tr>'
-      + '<th>Номер</th><th>Название</th><th>Стадия</th><th class="num">Цена</th><th class="num">Дни КП-План</th><th>Последняя активность</th>'
+      + '<th>Номер</th><th>Название</th><th>Стадия</th><th class="num">Цена</th><th class="num">Дни КП-План</th><th class="num">М +/-</th><th>Последняя активность</th>'
       + '</tr></thead><tbody>'
       + deal.milestones.map(function (m) { return milestoneRowHtml(deal, m); }).join('')
       + '</tbody></table>';
