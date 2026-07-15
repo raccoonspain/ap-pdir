@@ -335,7 +335,7 @@
       + '<td>' + esc(mod.number || '') + '</td>'
       + '<td>' + esc(mod.title) + ' ' + entityLinkHtml(ENTITY_TYPE_ID.MODULE, mod.id) + taskButtonHtml('module', deal, milestone, mod) + '</td>'
       + '<td>' + stageBadge(mod.stageName, mod.stageColor) + '</td>'
-      + '<td class="num ' + (mod.lagDays !== null && mod.lagDays < 0 ? 'lag-negative' : 'lag-positive') + '">' + fmtLag(mod.lagDays) + '</td>'
+      + '<td class="num ' + (mod.lagDays === null ? '' : (mod.lagDays < 0 ? 'lag-negative' : 'lag-positive')) + '">' + fmtLag(mod.lagDays) + '</td>'
       + '<td>' + esc(mod.developer || '—') + '</td>'
       + '<td>' + esc(mod.lastActivity || '') + (mod.lastActivityAt ? ' <span class="muted">(' + fmtDate(mod.lastActivityAt) + ')</span>' : '') + '</td>'
       + '</tr>';

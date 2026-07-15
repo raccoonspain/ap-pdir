@@ -113,7 +113,11 @@ function dashboardModuleLagDays(string $modStageCode, array $mod, ?string $today
     if ($raw === null || $raw === '') return null;
     $stageDate = substr((string)$raw, 0, 10);
     $today = $todayYmd ?? date('Y-m-d');
-    $diff = (new DateTimeImmutable($today))->diff(new DateTimeImmutable($stageDate));
+    try {
+        $diff = (new DateTimeImmutable($today))->diff(new DateTimeImmutable($stageDate));
+    } catch (\Exception $e) {
+        return null;
+    }
     return (float)((int)$diff->format('%r%a'));
 }
 
