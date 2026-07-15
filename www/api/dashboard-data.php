@@ -316,7 +316,7 @@ function fetchDashboardData(B24 $b24, string $preset = 'active'): array {
     $milestoneSelect = ['id', 'title', 'stageId', 'parentId1050', 'ufCrm15MstNum', 'ufCrm15MstCost', 'ufCrm15MstContrPlan', 'ufCrm15MstActLast', 'ufCrm15MstActDate'];
     $milestones = dashboardFetchAllItems($b24, DASHBOARD_MILESTONE_ENTITY_TYPE_ID, ['parentId1050' => $dealIds], $milestoneSelect);
 
-    $moduleSelect = ['id', 'title', 'stageId', 'parentId1050', 'parentId1054', 'ufCrm19ModNum', 'ufCrm19ModCreatorUser', 'ufCrm19ModActivTxtlast', 'ufCrm19ModActivDlast'];
+    $moduleSelect = ['id', 'title', 'stageId', 'parentId1050', 'parentId1054', 'ufCrm19ModNum', 'ufCrm19ModCreatorUser', 'ufCrm19ModActivTxtlast', 'ufCrm19ModActivDlast', 'ufCrm19ModRun', 'ufCrm19ModCheck', 'ufCrm19ModCreate', 'ufCrm19ModEdit', 'ufCrm19ModWait', 'ufCrm19ModApprove'];
     $modules = dashboardFetchAllItems($b24, DASHBOARD_MODULE_ENTITY_TYPE_ID, ['parentId1050' => $dealIds], $moduleSelect);
 
     $milestoneIds = array_map(fn($m) => (int)$m['id'], $milestones);
@@ -381,9 +381,15 @@ function fetchDashboardData(B24 $b24, string $preset = 'active'): array {
             if ($mAwaitingPayment) $kpi['awaitingPaymentMilestoneCount']++;
 
             $moduleRows = [];
+            $mOnTrack = 0;
+            $mOverdue = 0;
             foreach ($modulesByMilestone[(string)$m['id']] ?? [] as $mod) {
                 $modStageCode = dashboardStageCode($mod['stageId'] ?? null);
                 $dealModuleCounts[$modStageCode] = ($dealModuleCounts[$modStageCode] ?? 0) + 1;
+                $modLagDays = dashboardModuleLagDays($modStageCode, $mod);
+                if ($modLagDays !== null) {
+                    if ($modLagDays < 0) { $mOverdue++; } else { $mOnTrack++; }
+                }
                 $moduleRows[] = [
                     'id'            => (int)$mod['id'],
                     'number'        => $mod['ufCrm19ModNum'] ?? null,
@@ -394,6 +400,7 @@ function fetchDashboardData(B24 $b24, string $preset = 'active'): array {
                     'developer'     => $developerNames[(string)($mod['ufCrm19ModCreatorUser'] ?? '')] ?? null,
                     'lastActivity'  => $mod['ufCrm19ModActivTxtlast'] ?? null,
                     'lastActivityAt'=> $mod['ufCrm19ModActivDlast'] ?? null,
+                    'lagDays'       => $modLagDays,
                 ];
             }
 
@@ -409,6 +416,11 @@ function fetchDashboardData(B24 $b24, string $preset = 'active'): array {
                 'lastActivity'   => $m['ufCrm15MstActLast'] ?? null,
                 'lastActivityAt' => $m['ufCrm15MstActDate'] ?? null,
                 'modules'        => $moduleRows,
+                'moduleLag'      => [
+                    'onTrack'    => $mOnTrack,
+                    'overdue'    => $mOverdue,
+                    'hasModules' => count($moduleRows) > 0,
+                ],
             ];
         }
 
