@@ -76,6 +76,20 @@ const DASHBOARD_MODULE_SHORT_LABELS = [
     'FAIL'        => 'аннул',
 ];
 
+/**
+ * Плановая дата завершения стадии Модуля — см. /source/АП Module.md,
+ * названия полей 1:1 совпадают с русским названием стадии. Для SUCCESS/FAIL
+ * (терминальные) поля-даты нет — не отслеживаем срыв на этих стадиях.
+ */
+const DASHBOARD_MODULE_STAGE_DATE_FIELD = [
+    'NEW'         => 'ufCrm19ModRun',
+    'PREPARATION' => 'ufCrm19ModCheck',
+    'CLIENT'      => 'ufCrm19ModCreate',
+    'UC_WI1QUU'   => 'ufCrm19ModEdit',
+    'UC_MTO1QJ'   => 'ufCrm19ModWait',
+    'UC_DFWFJU'   => 'ufCrm19ModApprove',
+];
+
 const DASHBOARD_PAY_SENT_STAGE = 'UC_4NSTRS';
 
 /** `STAGE_ID` вида `DT1050_21:NEW` → бизнес-код стадии `NEW`. */
@@ -83,6 +97,24 @@ function dashboardStageCode(?string $stageId): string {
     $stageId = (string)$stageId;
     $pos = strrpos($stageId, ':');
     return $pos === false ? $stageId : substr($stageId, $pos + 1);
+}
+
+/**
+ * Лаг модуля в днях: дата-план текущей стадии минус сегодня.
+ * >=0 — по графику, <0 — срыв внутреннего срока стадии. null — терминальная
+ * стадия (SUCCESS/FAIL) или дата стадии ещё не заполнена (модуль не
+ * участвует в счётчике «М +/-» на уровне этапа).
+ * $todayYmd — только для теста, по умолчанию берётся реальная дата сервера.
+ */
+function dashboardModuleLagDays(string $modStageCode, array $mod, ?string $todayYmd = null): ?float {
+    $field = DASHBOARD_MODULE_STAGE_DATE_FIELD[$modStageCode] ?? null;
+    if ($field === null) return null;
+    $raw = $mod[$field] ?? null;
+    if ($raw === null || $raw === '') return null;
+    $stageDate = substr((string)$raw, 0, 10);
+    $today = $todayYmd ?? date('Y-m-d');
+    $diff = (new DateTimeImmutable($today))->diff(new DateTimeImmutable($stageDate));
+    return (float)((int)$diff->format('%r%a'));
 }
 
 /**
