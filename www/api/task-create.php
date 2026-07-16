@@ -64,6 +64,8 @@ $fields = [
     'CREATED_BY'     => (int)$session['userId'],
     'UF_CRM_TASK'    => [taskCreateCrmBinding(TASK_CREATE_DEAL_ENTITY_TYPE_ID, $dealId)],
     'TAGS'           => [TASK_CREATE_TAG],
+    'ALLOW_CHANGE_DEADLINE' => 'N',
+    'TASK_CONTROL'          => 'Y',
 ];
 if ($objectShortName !== '') {
     $fields[TASK_CREATE_OBJECT_NAME_FIELD] = $objectShortName;

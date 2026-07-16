@@ -263,7 +263,7 @@
     state.taskModalDealId = deal.id;
     state.taskModalObjectShortName = deal.objectShortName || '';
 
-    els.taskTitle.value = '';
+    els.taskTitle.value = deal.code ? deal.code + '-' : '';
     els.taskDescription.value = taskDescriptionFor(ds.taskLevel, deal, milestone, mod);
     els.taskResponsible.value = '';
     els.taskDeadline.value = '';
